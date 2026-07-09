@@ -1,0 +1,62 @@
+#include <windows.h>
+#include "src/resource.h"
+
+// Dastur ikonkasi. Eng kichik ID'li ICON resursi .exe ikonkasi bo'ladi.
+IDI_APPICON ICON "assets/icon.ico"
+
+// Til tanlash dialogi (matnlar ish vaqtida qo'yiladi - shuning uchun bu yerda bo'sh)
+IDD_LANG DIALOGEX 0, 0, 200, 94
+STYLE DS_CENTER | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Language"
+FONT 9, "Segoe UI"
+BEGIN
+    LTEXT      "", IDC_LANG_PROMPT, 12, 10, 176, 18
+    PUSHBUTTON "", IDC_LANG_UZ,     12, 34, 176, 15
+    PUSHBUTTON "", IDC_LANG_RU,     12, 53, 176, 15
+    PUSHBUTTON "", IDC_LANG_EN,     12, 72, 176, 15
+END
+
+// Sozlamalar dialogi (matnlar ish vaqtida joriy tilda qo'yiladi)
+IDD_SETTINGS DIALOGEX 0, 0, 246, 180
+STYLE DS_CENTER | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Settings"
+FONT 9, "Segoe UI"
+BEGIN
+    LTEXT      "", IDC_SET_LANG_LBL, 12, 14, 76, 10
+    COMBOBOX   IDC_SET_LANG, 92, 12, 142, 90, CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    LTEXT      "", IDC_SET_TRIG_LBL, 12, 38, 76, 10
+    COMBOBOX   IDC_SET_TRIG, 92, 36, 142, 120, CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    PUSHBUTTON "", IDC_SET_CAPTURE,  92, 56, 142, 15
+    LTEXT      "", IDC_SET_CURRENT,  12, 80, 222, 10
+    LTEXT      "", IDC_SET_APO_LBL,  12, 98, 76, 10
+    COMBOBOX   IDC_SET_APO, 92, 96, 142, 100, CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    AUTOCHECKBOX "", IDC_SET_STARTUP, 12, 120, 222, 12
+    DEFPUSHBUTTON "", IDOK,          122, 154, 54, 16
+    PUSHBUTTON "", IDCANCEL,         180, 154, 54, 16
+END
+
+// Dastur haqida dialogi
+IDD_ABOUT DIALOGEX 0, 0, 260, 150
+STYLE DS_CENTER | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "About"
+FONT 9, "Segoe UI"
+BEGIN
+    LTEXT      "", IDC_ABOUT_DESC,   14, 12, 232, 76
+    LTEXT      "", IDC_ABOUT_DEV,    14, 92, 232, 12
+    DEFPUSHBUTTON "", IDC_ABOUT_OPEN,    14, 120, 52, 18
+    PUSHBUTTON "", IDC_ABOUT_GITHUB,     74, 120, 52, 18
+    PUSHBUTTON "", IDC_ABOUT_LICENSE,   134, 120, 52, 18
+    PUSHBUTTON "", IDCANCEL,            194, 120, 52, 18
+END
+
+// Litsenziya / ogohlantirish dialogi (matn ish vaqtida joriy tilda qo'yiladi)
+IDD_LICENSE DIALOGEX 0, 0, 300, 190
+STYLE DS_CENTER | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "License"
+FONT 9, "Segoe UI"
+BEGIN
+    EDITTEXT   IDC_LIC_TEXT, 14, 12, 272, 140,
+               ES_MULTILINE | ES_READONLY | WS_VSCROLL | WS_TABSTOP
+    DEFPUSHBUTTON "", IDOK,          120, 162, 76, 16
+    PUSHBUTTON "", IDC_LIC_GITHUB,   210, 162, 76, 16
+END

@@ -1,0 +1,8 @@
+# Build natijalari (rasmiy .exe faqat GitHub Releases'da tarqatiladi)
+*.exe
+*.exe.sha256
+*.o
+*.obj
+*.res
+
+# assets/icon.ico saqlanadi — u build uchun kerak (windres app.rc).
