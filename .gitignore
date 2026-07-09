@@ -4,5 +4,6 @@
 *.o
 *.obj
 *.res
+build_obj/
 
 # assets/icon.ico saqlanadi — u build uchun kerak (windres app.rc).

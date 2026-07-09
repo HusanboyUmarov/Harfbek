@@ -1,0 +1,13 @@
+# .bat fayllar cmd uchun har doim CRLF bo'lishi shart —
+# aks holda cmd ularni noto'g'ri o'qiydi va build "jim" buziladi.
+*.bat text eol=crlf
+*.rc  text eol=crlf
+
+# Manba fayllar
+*.cpp text
+*.h   text
+*.md  text
+
+# Ikkilik fayllar
+*.ico binary
+*.exe binary

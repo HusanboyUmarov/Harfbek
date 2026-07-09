@@ -6,17 +6,38 @@ static HHOOK           g_hook = NULL;       // klaviatura hook
 static HHOOK           g_mouseHook = NULL;  // sichqoncha hook (Ctrl+o'ng-tugma)
 static const ULONG_PTR kInjectSig = 0x555A424B; // "UZBK" - o'zimiz yuborgan input belgisi
 
-// --- Trigger tugmani "bosib tanlash" (capture) rejimi ---
-// Sozlamalar oynasi g_capturing = true qiladi. Hook birinchi (real) tugma
-// bosilishini "yutib", uni g_capturedVk ga yozadi va oynaga xabar yuboradi.
-volatile bool g_capturing        = false;
-volatile UINT g_capturedVk       = 0;
-HWND          g_captureNotifyWnd  = NULL;
-
 // Oxirgi marta modifikator "qayta bosilgan" vaqt (stuck-key tekshiruvi uchun).
 static volatile DWORD g_repressTick = 0;
 
 static inline bool IsDown(int vk) { return (GetAsyncKeyState(vk) & 0x8000) != 0; }
+
+// --- Modifikator bo'lmagan trigger (masalan VK_APPS, Caps Lock, F-tugmalar) ---
+// Bunday tugmalar yolg'iz bosilganda ham o'z vazifasini bajaradi (VK_APPS
+// kontekst menyu ochadi, Caps holatni almashtiradi...). Shuning uchun ularni
+// hook'da TO'LIQ yutamiz. Yutilgan tugmani GetAsyncKeyState ko'rmaydi,
+// shuning uchun bosib turilganini o'zimiz kuzatamiz.
+static volatile bool g_trigHeld = false;  // modifikator bo'lmagan trigger bosib turilibdimi
+
+// Alt/Ctrl/Shift oilasi: xavfsiz modifikatorlar — yutilmaydi,
+// holati GetAsyncKeyState bilan tekshiriladi. (Sozlamalar oynasi ham
+// ogohlantirish kerak-kerakmasligini shu bilan aniqlaydi.)
+bool Trigger_IsModifier(UINT vk)
+{
+    switch (vk) {
+    case VK_MENU:    case VK_LMENU:    case VK_RMENU:
+    case VK_CONTROL: case VK_LCONTROL: case VK_RCONTROL:
+    case VK_SHIFT:   case VK_LSHIFT:   case VK_RSHIFT:
+        return true;
+    }
+    return false;
+}
+
+// Trigger o'zgarganda (Sozlamalar saqlanganda) eski kuzatuv holatini tozalaydi —
+// aks holda oldingi tugmaning "bosib turilgan" holati yangi triggerga o'tib qoladi.
+void Hook_ResetTriggerState()
+{
+    g_trigHeld = false;
+}
 
 // Modifikator uchun to'g'ri scancode (chap/o'ng farqi extended bayroqda).
 static WORD ModScan(WORD vk)
@@ -50,7 +71,10 @@ static bool TriggerDown()
     case VK_MENU:    return IsDown(VK_LMENU)    || IsDown(VK_RMENU);
     case VK_CONTROL: return IsDown(VK_LCONTROL) || IsDown(VK_RCONTROL);
     case VK_SHIFT:   return IsDown(VK_LSHIFT)   || IsDown(VK_RSHIFT);
-    default:         return IsDown(g_settings.triggerVk);
+    default:
+        if (Trigger_IsModifier(g_settings.triggerVk))
+            return IsDown(g_settings.triggerVk);
+        return g_trigHeld;   // yutilgan tugma — holatini o'zimiz kuzatamiz
     }
 }
 
@@ -119,6 +143,16 @@ static LRESULT CALLBACK KeyboardProc(int nCode, WPARAM wParam, LPARAM lParam)
         {
             PostMessageW(g_hWnd, WM_APP_MODCHECK, (WPARAM)k->vkCode, 0);
         }
+
+        // Modifikator bo'lmagan trigger qo'yib yuborildi: bosilishini yutgan
+        // bo'lsak, qo'yib yuborilishini ham yutamiz.
+        if (!injected && !Trigger_IsModifier(g_settings.triggerVk) &&
+            k->vkCode == g_settings.triggerVk)
+        {
+            bool wasHeld = g_trigHeld;
+            g_trigHeld = false;
+            if (wasHeld) return 1;
+        }
     }
 
     if (nCode == HC_ACTION &&
@@ -127,14 +161,15 @@ static LRESULT CALLBACK KeyboardProc(int nCode, WPARAM wParam, LPARAM lParam)
         KBDLLHOOKSTRUCT* k = (KBDLLHOOKSTRUCT*)lParam;
         bool injected = (k->flags & LLKHF_INJECTED) || (k->dwExtraInfo == kInjectSig);
 
-        // "Bosib tanlash" rejimi: birinchi real tugmani ushlab olamiz.
-        // (LL hook chap/o'ng modifikatorlarni alohida beradi: VK_LMENU/VK_RMENU...)
-        if (g_capturing && !injected) {
-            g_capturedVk = (k->vkCode == VK_ESCAPE) ? 0 : k->vkCode;
-            g_capturing  = false;
-            if (g_captureNotifyWnd)
-                PostMessageW(g_captureNotifyWnd, WM_APP_CAPTURED, 0, 0);
-            return 1;   // tugmani yutamiz (boshqa oynaga o'tmasin)
+        // Modifikator bo'lmagan trigger tugmasining O'ZINI yutamiz: masalan,
+        // VK_APPS (menyu tugmasi) trigger bo'lsa, har bosilganda kontekst
+        // menyu ochilib ketmasligi kerak. Holatini g_trigHeld da kuzatamiz.
+        if (g_settings.enabled && !injected &&
+            !Trigger_IsModifier(g_settings.triggerVk) &&
+            k->vkCode == g_settings.triggerVk)
+        {
+            g_trigHeld = true;
+            return 1;
         }
 
         if (g_settings.enabled && !injected && TriggerDown())
@@ -143,7 +178,16 @@ static LRESULT CALLBACK KeyboardProc(int nCode, WPARAM wParam, LPARAM lParam)
             {
                 if (kMaps[i].vk == k->vkCode)
                 {
-                    bool shift = (GetAsyncKeyState(VK_SHIFT) & 0x8000) != 0;
+                    // Trigger Shift oilasidan bo'lsa, uni katta harf belgisi deb
+                    // hisoblamaymiz (aks holda hamma harf katta chiqadi) —
+                    // faqat QARSHI tomondagi Shift katta harf beradi.
+                    bool shift;
+                    switch (g_settings.triggerVk) {
+                    case VK_SHIFT:  shift = false; break;
+                    case VK_LSHIFT: shift = IsDown(VK_RSHIFT); break;
+                    case VK_RSHIFT: shift = IsDown(VK_LSHIFT); break;
+                    default:        shift = IsDown(VK_SHIFT);  break;
+                    }
                     bool caps  = (GetKeyState(VK_CAPITAL) & 1) != 0;
                     bool upper = shift ^ caps;
                     SendUnicode(upper ? kMaps[i].upper : kMaps[i].lower);

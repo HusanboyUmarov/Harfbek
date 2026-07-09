@@ -1,4 +1,4 @@
-#include "settings.h"
+#include "app.h"      // Trigger_IsAllowed
 #include "config.h"   // TRIGGER_VK (standart trigger)
 
 // Standart qiymatlar (apo = oddiy apostrof ')
@@ -37,7 +37,11 @@ void Settings_Load()
     g_settings.apo          = (wchar_t)GetPrivateProfileIntW(L"general", L"Apostrophe",  0x27,        ini);
 
     if (g_settings.lang < 0 || g_settings.lang >= LANG_COUNT) g_settings.lang = LANG_UZ;
-    if (g_settings.triggerVk == 0) g_settings.triggerVk = TRIGGER_VK;
+    // Faqat sinalgan trigger tugmalari qabul qilinadi. Eski versiyada saqlangan
+    // istalgan tugma yoki buzilgan/chala yozilgan ini (masalan, tok o'chib
+    // qolganda) standartga qaytadi.
+    if (!Trigger_IsAllowed(g_settings.triggerVk))
+        g_settings.triggerVk = TRIGGER_VK;
     if (g_settings.apo == 0) g_settings.apo = L'\'';
 }
 

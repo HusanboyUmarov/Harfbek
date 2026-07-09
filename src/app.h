@@ -12,8 +12,6 @@
 
 // Tray ikonka xabari
 #define WM_TRAYICON  (WM_APP + 1)
-// Trigger tugma "bosib tanlash" tugagach hook Sozlamalar oynasiga yuboradi
-#define WM_APP_CAPTURED  (WM_APP + 2)
 // Modifikator "osilib qolgan"mi tekshirish (stuck-key himoyasi) — main thread'da
 #define WM_APP_MODCHECK  (WM_APP + 3)
 // Ctrl+o'ng-tugma bosilganda o'girish menyusini ko'rsatish (wp=x, lp=y)
@@ -43,13 +41,9 @@ extern HWND      g_hWnd;
 bool Hook_Install();
 void Hook_Uninstall();
 void Hook_ForceModUp(UINT vk);   // "osilib qolgan" modifikatorni majburan qo'yib yuboradi
-
-// Trigger tugmani "bosib tanlash" rejimi (hook.cpp da aniqlanadi).
-// Sozlamalar oynasi g_capturing ni yoqadi; hook birinchi bosilgan tugmani
-// g_capturedVk ga yozib, g_captureNotifyWnd ga WM_APP_CAPTURED yuboradi.
-extern volatile bool g_capturing;
-extern volatile UINT g_capturedVk;
-extern HWND          g_captureNotifyWnd;
+bool Trigger_IsModifier(UINT vk);   // Alt/Ctrl/Shift oilasimi (yutilmaydigan trigger)
+bool Trigger_IsAllowed(UINT vk);    // sinalgan trigger ro'yxatida bormi (ui_settings.cpp)
+void Hook_ResetTriggerState();      // trigger o'zgarganda kuzatuv holatini tozalaydi
 
 // Trigger tugma nomlari (ui_settings.cpp da aniqlanadi)
 const wchar_t* TriggerFullName(UINT vk);            // to'liq, joriy tilda: "O'ng Alt"

@@ -15,7 +15,6 @@
 #define IDC_SET_LANG      212   // til combobox
 #define IDC_SET_TRIG_LBL  213
 #define IDC_SET_TRIG      214   // trigger combobox
-#define IDC_SET_CAPTURE   215   // "bosib tanlash" tugmasi
 #define IDC_SET_CURRENT   216   // joriy trigger matni
 #define IDC_SET_STARTUP   217   // Windows bilan ishga tushish (checkbox)
 #define IDC_SET_APO_LBL   218

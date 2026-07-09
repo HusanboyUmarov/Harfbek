@@ -16,7 +16,12 @@ const wchar_t* TriggerFullName(UINT vk)
     case VK_LMENU:    return T(S_TRIG_LALT);
     case VK_MENU:     return T(S_TRIG_BOTHALT);
     case VK_RCONTROL: return T(S_TRIG_RCTRL);
+    case VK_RSHIFT:   return T(S_TRIG_RSHIFT);
     case VK_CAPITAL:  return T(S_TRIG_CAPS);
+    case VK_APPS:     return T(S_TRIG_APPS);
+    case VK_SCROLL:   return T(S_TRIG_SCROLL);
+    case VK_PAUSE:    return T(S_TRIG_PAUSE);
+    case VK_F12:      return T(S_TRIG_F12);
     default: {
         static wchar_t buf[48];
         UINT sc = MapVirtualKeyW(vk, MAPVK_VK_TO_VSC);
@@ -44,7 +49,12 @@ void TriggerKeyCap(UINT vk, wchar_t* out, int n)
     case VK_LMENU:
     case VK_MENU:     s = L"Alt";   break;
     case VK_RCONTROL: s = L"Ctrl";  break;
+    case VK_RSHIFT:   s = L"Shift"; break;
     case VK_CAPITAL:  s = L"Caps";  break;
+    case VK_APPS:     s = L"Menu";  break;
+    case VK_SCROLL:   s = L"ScrLk"; break;
+    case VK_PAUSE:    s = L"Pause"; break;
+    case VK_F12:      s = L"F12";   break;
     default: {
         UINT sc = MapVirtualKeyW(vk, MAPVK_VK_TO_VSC);
         if (sc && GetKeyNameTextW((LONG)(sc << 16), out, n) > 0) return;
@@ -59,17 +69,33 @@ void TriggerKeyCap(UINT vk, wchar_t* out, int n)
 //  Sozlamalar dialogi
 // ---------------------------------------------------------------------
 
-// Tayyor trigger variantlari (combobox uchun)
+// Trigger variantlari (combobox uchun) — FAQAT sinalgan tugmalar.
+// Alt/Ctrl/Shift oilasi oddiy modifikator sifatida ishlaydi; qolganlari
+// (Caps, Menyu, Scroll Lock, Pause, F12) hook tomonidan to'liq yutiladi,
+// shuning uchun o'zining standart vazifasini bajarmaydi — bu ataylab shunday.
 struct TrigOpt { StrId name; UINT vk; };
 static const TrigOpt kTrigOpts[] = {
     { S_TRIG_RALT,    VK_RMENU    },
     { S_TRIG_LALT,    VK_LMENU    },
     { S_TRIG_BOTHALT, VK_MENU     },
     { S_TRIG_RCTRL,   VK_RCONTROL },
+    { S_TRIG_RSHIFT,  VK_RSHIFT   },
     { S_TRIG_CAPS,    VK_CAPITAL  },
+    { S_TRIG_APPS,    VK_APPS     },
+    { S_TRIG_SCROLL,  VK_SCROLL   },
+    { S_TRIG_PAUSE,   VK_PAUSE    },
+    { S_TRIG_F12,     VK_F12      },
 };
 static const int kTrigOptCount = sizeof(kTrigOpts) / sizeof(kTrigOpts[0]);
-static const UINT kCaptureSentinel = 0xFFFF;   // combobox "Boshqa tugma..." elementi
+
+// Berilgan VK sinalgan trigger ro'yxatida bormi (ini fayldan o'qishda
+// tekshiriladi — eski/buzilgan qiymatlar standartga qaytadi).
+bool Trigger_IsAllowed(UINT vk)
+{
+    for (int i = 0; i < kTrigOptCount; ++i)
+        if (kTrigOpts[i].vk == vk) return true;
+    return false;
+}
 
 // Apostrof variantlari (o' g' uchun chiqadigan belgi)
 struct ApoOpt { const wchar_t* label; wchar_t ch; };
@@ -104,15 +130,6 @@ static void SelectTrigInCombo(HWND h)
     SendMessageW(c, CB_SETCURSEL, sel, 0);
 }
 
-// "Bosib tanlash" rejimini yoqadi (hook keyingi tugmani ushlaydi)
-static void StartCapture(HWND h)
-{
-    g_capturedVk      = 0;
-    g_captureNotifyWnd = h;
-    g_capturing       = true;
-    SetDlgItemTextW(h, IDC_SET_CURRENT, T(S_SET_CAPTURE_PROMPT));
-}
-
 static INT_PTR CALLBACK SettingsProc(HWND h, UINT msg, WPARAM wp, LPARAM lp)
 {
     switch (msg)
@@ -126,7 +143,6 @@ static INT_PTR CALLBACK SettingsProc(HWND h, UINT msg, WPARAM wp, LPARAM lp)
         SetWindowTextW(h, T(S_SET_TITLE));
         SetDlgItemTextW(h, IDC_SET_LANG_LBL, T(S_SET_LANGUAGE));
         SetDlgItemTextW(h, IDC_SET_TRIG_LBL, T(S_SET_TRIGGER));
-        SetDlgItemTextW(h, IDC_SET_CAPTURE,  T(S_SET_CAPTURE));
         SetDlgItemTextW(h, IDC_SET_APO_LBL,  T(S_SET_APOSTROPHE));
         SetDlgItemTextW(h, IDC_SET_STARTUP,  T(S_SET_STARTUP));
         SetDlgItemTextW(h, IDOK,             T(S_SET_SAVE));
@@ -139,14 +155,12 @@ static INT_PTR CALLBACK SettingsProc(HWND h, UINT msg, WPARAM wp, LPARAM lp)
         SendMessageW(lc, CB_ADDSTRING, 0, (LPARAM)L"English");
         SendMessageW(lc, CB_SETCURSEL, (WPARAM)s_lang, 0);
 
-        // Trigger combobox: tayyor variantlar + "Boshqa tugma..."
+        // Trigger combobox: faqat sinalgan tayyor variantlar
         HWND tc = GetDlgItem(h, IDC_SET_TRIG);
         for (int i = 0; i < kTrigOptCount; ++i) {
             int idx = (int)SendMessageW(tc, CB_ADDSTRING, 0, (LPARAM)T(kTrigOpts[i].name));
             SendMessageW(tc, CB_SETITEMDATA, idx, (LPARAM)kTrigOpts[i].vk);
         }
-        int cidx = (int)SendMessageW(tc, CB_ADDSTRING, 0, (LPARAM)T(S_TRIG_CUSTOM));
-        SendMessageW(tc, CB_SETITEMDATA, cidx, (LPARAM)kCaptureSentinel);
         SelectTrigInCombo(h);
 
         // Apostrof combobox
@@ -167,28 +181,6 @@ static INT_PTR CALLBACK SettingsProc(HWND h, UINT msg, WPARAM wp, LPARAM lp)
         return TRUE;
     }
 
-    case WM_APP_CAPTURED:
-    {
-        UINT vk = g_capturedVk;
-        if (vk == 0) {                 // Esc — bekor qilindi
-            UpdateCurrentText(h);
-            SelectTrigInCombo(h);
-            return TRUE;
-        }
-        // o, g, s, c harflarini trigger qilib bo'lmaydi (ular almashtiriladi)
-        if (vk == 'O' || vk == 'G' || vk == 'S' || vk == 'C') {
-            MessageBoxW(h, T(S_SET_WARN_BADKEY), T(S_SET_TITLE),
-                        MB_OK | MB_ICONWARNING);
-            UpdateCurrentText(h);
-            SelectTrigInCombo(h);
-            return TRUE;
-        }
-        s_trig = vk;
-        UpdateCurrentText(h);
-        SelectTrigInCombo(h);          // moslasa tayyor variant tanlanadi, aks holda -1
-        return TRUE;
-    }
-
     case WM_COMMAND:
         switch (LOWORD(wp))
         {
@@ -197,18 +189,9 @@ static INT_PTR CALLBACK SettingsProc(HWND h, UINT msg, WPARAM wp, LPARAM lp)
                 HWND tc = (HWND)lp;
                 int sel = (int)SendMessageW(tc, CB_GETCURSEL, 0, 0);
                 if (sel < 0) return TRUE;
-                UINT data = (UINT)SendMessageW(tc, CB_GETITEMDATA, sel, 0);
-                if (data == kCaptureSentinel) {
-                    StartCapture(h);           // "Boshqa tugma..." -> bosib tanlash
-                } else {
-                    s_trig = data;
-                    UpdateCurrentText(h);
-                }
+                s_trig = (UINT)SendMessageW(tc, CB_GETITEMDATA, sel, 0);
+                UpdateCurrentText(h);
             }
-            return TRUE;
-
-        case IDC_SET_CAPTURE:
-            StartCapture(h);
             return TRUE;
 
         case IDOK:
@@ -230,21 +213,16 @@ static INT_PTR CALLBACK SettingsProc(HWND h, UINT msg, WPARAM wp, LPARAM lp)
             g_settings.runAtStartup = su;
 
             Settings_Save();
-            g_capturing = false; g_captureNotifyWnd = NULL;
+            Hook_ResetTriggerState();   // eski triggerning "bosilgan" holati qolmasin
             EndDialog(h, 1);
             return TRUE;
         }
 
         case IDCANCEL:
-            g_capturing = false; g_captureNotifyWnd = NULL;
             EndDialog(h, 0);
             return TRUE;
         }
         break;
-
-    case WM_DESTROY:
-        g_capturing = false; g_captureNotifyWnd = NULL;
-        return FALSE;
     }
     return FALSE;
 }

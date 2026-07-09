@@ -111,28 +111,25 @@ static const wchar_t* STR[S_STR_COUNT][LANG_COUNT] = {
     /*S_SET_TITLE*/         { L"Sozlamalar", L"Настройки", L"Settings" },
     /*S_SET_LANGUAGE*/      { L"Til:", L"Язык:", L"Language:" },
     /*S_SET_TRIGGER*/       { L"Trigger tugma:", L"Клавиша-триггер:", L"Trigger key:" },
-    /*S_SET_CAPTURE*/       { L"Tugmani bosib tanlaş...", L"Задать нажатием...", L"Set by pressing a key..." },
-    /*S_SET_CAPTURE_PROMPT*/{ L"Kerakli tugmani bosing (Esc — bekor).",
-                              L"Нажмите нужную клавишу (Esc — отмена).",
-                              L"Press the desired key (Esc to cancel)." },
     /*S_SET_STARTUP*/       { L"Windows bilan işga tuşsin",
                               L"Запускать вместе с Windows",
                               L"Run at Windows startup" },
     /*S_SET_SAVE*/          { L"Saqlaş", L"Сохранить", L"Save" },
     /*S_SET_CANCEL*/        { L"Bekor qiliş", L"Отмена", L"Cancel" },
-    /*S_SET_WARN_BADKEY*/   { L"Bu tugmani işlatib bölmaydi (o, g, s, c harflari mumkin emas).",
-                              L"Эту клавишу нельзя использовать (o, g, s, c недопустимы).",
-                              L"This key can't be used (o, g, s, c are not allowed)." },
     /*S_SET_CURRENT*/       { L"Joriy:", L"Текущая:", L"Current:" },
     /*S_SET_APOSTROPHE*/    { L"Apostrof (o' g'):", L"Апостроф (o' g'):", L"Apostrophe (o' g'):" },
 
-    // --- trigger nomlari ---
-    /*S_TRIG_RALT*/       { L"Öng Alt", L"Правый Alt", L"Right Alt" },
+    // --- trigger nomlari (faqat sinalgan tugmalar) ---
+    /*S_TRIG_RALT*/       { L"Öng Alt (AltGr)", L"Правый Alt (AltGr)", L"Right Alt (AltGr)" },
     /*S_TRIG_LALT*/       { L"Çap Alt", L"Левый Alt", L"Left Alt" },
     /*S_TRIG_BOTHALT*/    { L"Ikkala Alt", L"Оба Alt", L"Both Alt" },
     /*S_TRIG_RCTRL*/      { L"Öng Ctrl", L"Правый Ctrl", L"Right Ctrl" },
+    /*S_TRIG_RSHIFT*/     { L"Öng Shift", L"Правый Shift", L"Right Shift" },
     /*S_TRIG_CAPS*/       { L"CapsLock", L"CapsLock", L"CapsLock" },
-    /*S_TRIG_CUSTOM*/     { L"Boşqa tugma...", L"Другая клавиша...", L"Custom key..." },
+    /*S_TRIG_APPS*/       { L"Menyu tugmasi (≣)", L"Клавиша меню (≣)", L"Menu key (≣)" },
+    /*S_TRIG_SCROLL*/     { L"Scroll Lock", L"Scroll Lock", L"Scroll Lock" },
+    /*S_TRIG_PAUSE*/      { L"Pause", L"Pause", L"Pause" },
+    /*S_TRIG_F12*/        { L"F12", L"F12", L"F12" },
 };
 
 const wchar_t* T(StrId id)
