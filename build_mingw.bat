@@ -12,19 +12,41 @@ cd /d "%~dp0"
 
 set "GPP="
 where g++ >nul 2>nul && set "GPP=g++"
+if not defined GPP call :find_winget_gpp
 
+REM g++ yo'q bo'lsa - foydalanuvchi roziligi bilan winget orqali o'zimiz o'rnatamiz
 if not defined GPP (
-    for /d %%d in ("%LOCALAPPDATA%\Microsoft\WinGet\Packages\BrechtSanders.WinLibs*") do (
-        if exist "%%d\mingw64\bin\g++.exe" set "GPP=%%d\mingw64\bin\g++.exe"
+    echo [XATO] g++ topilmadi. g++ - C++ kompilyatori, .exe yasash uchun kerak.
+    echo.
+    set "JAVOB="
+    set /p "JAVOB=MinGW-w64 hozir avtomatik o'rnatilsinmi? Internet kerak. [h=ha / y=yo'q]: "
+    if /i not "!JAVOB!"=="h" (
+        echo.
+        echo Bekor qilindi. Qo'lda o'rnatish uchun:
+        echo   winget install BrechtSanders.WinLibs.POSIX.UCRT
+        echo yoki build.bat / MSVC dan foydalaning.
+        pause
+        exit /b 1
     )
-)
-
-if not defined GPP (
-    echo [XATO] g++ topilmadi. O'rnatish uchun:
-    echo       winget install BrechtSanders.WinLibs.POSIX.UCRT
-    echo     yoki build.bat / MSVC dan foydalaning.
-    pause
-    exit /b 1
+    where winget >nul 2>nul
+    if errorlevel 1 (
+        echo [XATO] winget topilmadi. Windows'ni yangilang yoki qo'lda o'rnating: https://winlibs.com
+        pause
+        exit /b 1
+    )
+    echo.
+    echo MinGW-w64 o'rnatilmoqda, bir necha daqiqa kutiladi...
+    winget install --id BrechtSanders.WinLibs.POSIX.UCRT -e --accept-source-agreements --accept-package-agreements
+    call :find_winget_gpp
+    if not defined GPP (
+        echo.
+        echo [XATO] O'rnatishdan keyin ham g++ topilmadi.
+        echo Terminalni yopib qayta oching va build_mingw.bat ni yana ishga tushiring.
+        pause
+        exit /b 1
+    )
+    echo.
+    echo [OK] MinGW-w64 o'rnatildi, davom etamiz.
 )
 echo g++: !GPP!
 
@@ -104,3 +126,10 @@ echo [XATO] Qurishda xato. Yuqoridagi xabarlarni o'qing.
 endlocal
 pause
 exit /b 1
+
+REM WinGet o'rnatgan WinLibs papkasidan g++ ni izlaydi (PATH yangilanishi shart emas)
+:find_winget_gpp
+for /d %%d in ("%LOCALAPPDATA%\Microsoft\WinGet\Packages\BrechtSanders.WinLibs*") do (
+    if exist "%%d\mingw64\bin\g++.exe" set "GPP=%%d\mingw64\bin\g++.exe"
+)
+exit /b 0
