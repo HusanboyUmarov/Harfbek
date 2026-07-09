@@ -90,6 +90,18 @@ Skript hammasini o'zi qiladi:
 - Natija: `harfbek.exe` — statik bog'langan, boshqa kompyuterlarga ko'chirsa
   bo'ladigan bitta fayl.
 
+> **O'rnatish sekinmi?** MinGW-w64 o'rnatilayotganda `Extracting archive...`
+> qadami sekin kompyuterda (ayniqsa HDD'da) **20–40 daqiqa** olishi mumkin —
+> paket minglab fayldan iborat va antivirus har birini tekshiradi. Bu qotib
+> qolgani EMAS — bekor qilmasdan kuting. O'rnatish **bir martalik**: keyingi
+> barcha build'lar bir necha soniyada o'tadi.
+
+> **Build `Permission denied` bilan yiqildimi?** Harfbek **administrator
+> huquqida** ishlab turgan bo'lsa, build skripti uni avtomatik yopolmaydi va
+> exe ustiga yoza olmaydi. Tray'dagi **H** ikonkaga o'ng tugma → **Chiqish**
+> qilib, keyin build'ni qayta ishga tushiring. (Oddiy huquqda ishlayotgan
+> bo'lsa, skript o'zi yopadi — hech narsa qilish shart emas.)
+
 Visual Studio bo'lsa, MSVC bilan ham qursa bo'ladi — "Developer Command Prompt"
 ochib: `build.bat`.
 

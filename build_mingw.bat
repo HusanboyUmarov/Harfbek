@@ -18,6 +18,13 @@ REM g++ yo'q bo'lsa - foydalanuvchi roziligi bilan winget orqali o'zimiz o'rnata
 if not defined GPP (
     echo [XATO] g++ topilmadi. g++ - C++ kompilyatori, .exe yasash uchun kerak.
     echo.
+    echo   Eslatma: agar sizga faqat TAYYOR dastur kerak bo'lsa, build shart emas -
+    echo   boshqa kompyuterda qurilgan harfbek.exe ni oddiy ko'chirib ishlating.
+    echo   Kompilyator faqat kodni o'zgartirib qayta quradiganlarga kerak.
+    echo.
+    echo   O'rnatish bir martalik, lekin sekin kompyuterda 20-40 daqiqa olishi
+    echo   mumkin. Keyingi build'lar esa bir necha soniyada o'tadi.
+    echo.
     set "JAVOB="
     set /p "JAVOB=MinGW-w64 hozir avtomatik o'rnatilsinmi? Internet kerak. [h=ha / y=yo'q]: "
     if /i not "!JAVOB!"=="h" (
@@ -35,7 +42,8 @@ if not defined GPP (
         exit /b 1
     )
     echo.
-    echo MinGW-w64 o'rnatilmoqda, bir necha daqiqa kutiladi...
+    echo MinGW-w64 o'rnatilmoqda...
+    echo "Extracting archive..." qadami eng uzuni - qotib qolgan EMAS, kuting.
     winget install --id BrechtSanders.WinLibs.POSIX.UCRT -e --accept-source-agreements --accept-package-agreements
     call :find_winget_gpp
     if not defined GPP (
