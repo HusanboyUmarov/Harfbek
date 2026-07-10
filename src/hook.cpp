@@ -6,10 +6,27 @@ static HHOOK           g_hook = NULL;       // klaviatura hook
 static HHOOK           g_mouseHook = NULL;  // sichqoncha hook (Ctrl+o'ng-tugma)
 static const ULONG_PTR kInjectSig = 0x555A424B; // "UZBK" - o'zimiz yuborgan input belgisi
 
+// Sinov rejimi: -DHARFBEK_TEST_SIG bilan qurilganda, quyidagi imzoli inyeksiya
+// hodisalari "haqiqiy" (fizik) deb qabul qilinadi — sinov stendi (racetest)
+// fizik klaviaturani taqlid qila olishi uchun. Oddiy build'ga ta'siri yo'q.
+#ifdef HARFBEK_TEST_SIG
+static const ULONG_PTR kTestSig = 0x54534554; // "TEST"
+#endif
+static inline bool IsInjected(const KBDLLHOOKSTRUCT* k)
+{
+    bool inj = (k->flags & LLKHF_INJECTED) || (k->dwExtraInfo == kInjectSig);
+#ifdef HARFBEK_TEST_SIG
+    if (k->dwExtraInfo == kTestSig) inj = false;
+#endif
+    return inj;
+}
+
 // Oxirgi marta modifikator "qayta bosilgan" vaqt (stuck-key tekshiruvi uchun).
 static volatile DWORD g_repressTick = 0;
 
 static inline bool IsDown(int vk) { return (GetAsyncKeyState(vk) & 0x8000) != 0; }
+
+static void Hook_ResetGuardState();   // pastda (himoya-tap holati)
 
 // --- Modifikator bo'lmagan trigger (masalan VK_APPS, Caps Lock, F-tugmalar) ---
 // Bunday tugmalar yolg'iz bosilganda ham o'z vazifasini bajaradi (VK_APPS
@@ -37,6 +54,7 @@ bool Trigger_IsModifier(UINT vk)
 void Hook_ResetTriggerState()
 {
     g_trigHeld = false;
+    Hook_ResetGuardState();
 }
 
 // Modifikator uchun to'g'ri scancode (chap/o'ng farqi extended bayroqda).
@@ -78,6 +96,17 @@ static bool TriggerDown()
     }
 }
 
+// --- Soxta AltGr-LCtrl kuzatuvi ---
+// AltGr'li layoutlarda (masalan US-International) o'ng Alt bosilganda tizim
+// u bilan birga "soxta" LCtrl ham yuboradi (scancode 0x21D) va uni O'ZI
+// boshqaradi: bizning RMENU ko'tarishimizda o'zi ko'taradi, qayta
+// bosishimizda o'zi qayta bosadi. SendUnicode bu Ctrl'ga TEGMASLIGI shart:
+// biz uni o'zimiz qayta bossak (oddiy scancode 0x1D bilan), tizim "egalikni"
+// yo'qotadi — foydalanuvchi AltGr'ni qo'yib yuborganda LCtrl ko'tarilmay
+// ABADIY bosiq qolib qoladi (har harf Ctrl+harf bo'lib: Ctrl+W oynalarni
+// yopadi, Ctrl+Shift tilni almashtiradi...). Jonli sinovda isbotlangan.
+static volatile bool g_fakeLCtrl = false;
+
 // "Niqob" tugma (vk 0xE8 — Windows'da tayinlanmagan, hech narsa qilmaydi):
 // Alt bosilib-qo'yilgani orasida boshqa tugma "bosilgan"dek ko'rsatadi.
 // Busiz Windows bizning Alt ko'tarish/qayta-bosishimizni "Alt yolg'iz
@@ -103,7 +132,11 @@ static void SendUnicode(wchar_t ch)
 {
     const WORD mods[] = { VK_LMENU, VK_RMENU, VK_LCONTROL, VK_RCONTROL };
     WORD down[4]; int n = 0;
-    for (int i = 0; i < 4; ++i) if (IsDown(mods[i])) down[n++] = mods[i];
+    for (int i = 0; i < 4; ++i) {
+        // Soxta AltGr-LCtrl'ni tizimning o'ziga qoldiramiz (yuqoridagi izoh)
+        if (mods[i] == VK_LCONTROL && g_fakeLCtrl) continue;
+        if (IsDown(mods[i])) down[n++] = mods[i];
+    }
 
     // Butun ketma-ketlikni BITTA SendInput'da yuboramiz (atomik): bu tartib
     // buzilishi va hook'ka ko'p qayta kirishning oldini oladi.
@@ -153,6 +186,70 @@ static inline bool IsMod(UINT vk)
            vk == VK_LCONTROL || vk == VK_RCONTROL;
 }
 
+// =====================================================================
+//  Til-almashtirish (Alt+Shift / Ctrl+Shift) va "yolg'iz Alt" menyu-rejimga
+//  qarshi himoya.
+//
+//  Jonli tajribada isbotlangan faktlar (2026-07):
+//   - Windows'da O'NG Alt + Shift ham tilni almashtiradi (sozlamada
+//     "chap Alt+Shift" deyilsa ham) — RMENU trigger bundan qochib qutulmaydi.
+//   - Hotkey modifikator QO'YIB YUBORILGANDA otiladi; kombinatsiya bosiq
+//     paytida boshqa istalgan tugma bosilsa — bekor bo'ladi va autorepeat
+//     uni qayta "qurollantirmaydi". Demak bitta niqob-tap yetarli.
+//   - Xuddi shu qoida "yolg'iz Alt" menyu-rejimiga ham tegishli.
+//
+//  Muammo: biz trigger+harf ni yutganimizda Windows harfni KO'RMAYDI —
+//  unga "toza" Alt(+Shift) bosilib-qo'yilgandek ko'rinadi. Natijada til
+//  almashib ketadi yoki menyu qatori faollashib klaviatura "yozmay qoladi"
+//  (S = Size/Свернуть kabi mnemonikalar oynalarni yashiradi). SendUnicode
+//  ichidagi niqoblar kech qolishi mumkin: foydalanuvchi modifikatorni juda
+//  tez qo'yib yuborsa, haqiqiy keyup bizning inyeksiyamizdan OLDIN navbatga
+//  tushadi. Shuning uchun xavfli kombinatsiya SHAKLLANGAN zahoti (qo'yib
+//  yuborishni kutmasdan) niqob-tap yuboramiz.
+// =====================================================================
+
+// Trigger oilasiga tegishli vk mi (umumiy VK uchun chap/o'ng variantlari bilan)
+static bool IsTriggerVk(UINT vk)
+{
+    switch (g_settings.triggerVk) {
+    case VK_MENU:    return vk == VK_LMENU    || vk == VK_RMENU;
+    case VK_CONTROL: return vk == VK_LCONTROL || vk == VK_RCONTROL;
+    case VK_SHIFT:   return vk == VK_LSHIFT   || vk == VK_RSHIFT;
+    default:         return vk == (UINT)g_settings.triggerVk;
+    }
+}
+
+static inline bool IsShiftVk(UINT vk)
+{
+    return vk == VK_SHIFT || vk == VK_LSHIFT || vk == VK_RSHIFT;
+}
+
+// Trigger bilan birga til-almashtirish kombinatsiyasini hosil qiladigan
+// "sherik" tugma: Alt/Ctrl triggerlar uchun Shift, Shift trigger uchun Alt/Ctrl.
+static bool IsArmMate(UINT vk)
+{
+    if (IsShiftVk(g_settings.triggerVk)) return IsMod(vk);
+    return IsShiftVk(vk);
+}
+
+// Tap'ni har autorepeat'da qaytarmaslik uchun bosiqlik holati
+static volatile bool g_trigModHeld = false;
+static volatile bool g_mateHeld    = false;
+
+static void Hook_ResetGuardState()
+{
+    g_trigModHeld = false;
+    g_mateHeld    = false;
+}
+
+static void SendMaskTap()
+{
+    INPUT s[2];
+    FillMask(s[0], false);
+    FillMask(s[1], true);
+    SendInput(2, s, sizeof(INPUT));
+}
+
 static LRESULT CALLBACK KeyboardProc(int nCode, WPARAM wParam, LPARAM lParam)
 {
     if (nCode == HC_ACTION &&
@@ -161,11 +258,22 @@ static LRESULT CALLBACK KeyboardProc(int nCode, WPARAM wParam, LPARAM lParam)
         // Stuck-key himoyasi: real modifikator qo'yib yuborilganda, agar
         // yaqinda harf yuborgan bo'lsak, u "osilib qolmaganini" tekshiramiz.
         KBDLLHOOKSTRUCT* k = (KBDLLHOOKSTRUCT*)lParam;
-        bool injected = (k->flags & LLKHF_INJECTED) || (k->dwExtraInfo == kInjectSig);
+        bool injected = IsInjected(k);
+
+        // Soxta AltGr-LCtrl ko'tarildi (inyeksiya bo'lsa ham kuzatamiz)
+        if (k->vkCode == VK_LCONTROL)
+            g_fakeLCtrl = false;
+
         if (!injected && IsMod(k->vkCode) &&
             (GetTickCount() - g_repressTick) < 1000 && g_hWnd)
         {
             PostMessageW(g_hWnd, WM_APP_MODCHECK, (WPARAM)k->vkCode, 0);
+        }
+
+        // Himoya-tap dedup holatini yangilaymiz (bosiqlik tugadi)
+        if (!injected) {
+            if (IsTriggerVk(k->vkCode)) g_trigModHeld = false;
+            if (IsArmMate(k->vkCode))   g_mateHeld    = false;
         }
 
         // Modifikator bo'lmagan trigger qo'yib yuborildi: bosilishini yutgan
@@ -183,7 +291,26 @@ static LRESULT CALLBACK KeyboardProc(int nCode, WPARAM wParam, LPARAM lParam)
         (wParam == WM_KEYDOWN || wParam == WM_SYSKEYDOWN))
     {
         KBDLLHOOKSTRUCT* k = (KBDLLHOOKSTRUCT*)lParam;
-        bool injected = (k->flags & LLKHF_INJECTED) || (k->dwExtraInfo == kInjectSig);
+        bool injected = IsInjected(k);
+
+        // Soxta AltGr-LCtrl bosildi? (scancode 0x21D — tizim sintez qilgan;
+        // oddiy 0x1D bo'lsa bu haqiqiy/oddiy Ctrl.) Inyeksiya bo'lsa ham kuzatamiz.
+        if (k->vkCode == VK_LCONTROL)
+            g_fakeLCtrl = (k->scanCode == 0x21D);
+
+        // Himoya-tap: trigger-modifikator bosilganda va trigger bosiq turganda
+        // "sherik" (Shift) bosilganda darhol niqob yuboramiz — til-almashtirish
+        // hotkey'i va "yolg'iz Alt" menyu-rejimi shu zahoti zararsizlanadi.
+        // (Tap bizning inyeksiyamiz, keyingi hodisalarga xalaqit bermaydi.)
+        if (g_settings.enabled && !injected &&
+            Trigger_IsModifier(g_settings.triggerVk))
+        {
+            if (IsTriggerVk(k->vkCode)) {
+                if (!g_trigModHeld) { g_trigModHeld = true; SendMaskTap(); }
+            } else if (IsArmMate(k->vkCode) && TriggerDown()) {
+                if (!g_mateHeld)    { g_mateHeld = true;    SendMaskTap(); }
+            }
+        }
 
         // Modifikator bo'lmagan trigger tugmasining O'ZINI yutamiz: masalan,
         // VK_APPS (menyu tugmasi) trigger bo'lsa, har bosilganda kontekst

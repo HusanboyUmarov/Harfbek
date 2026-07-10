@@ -13,10 +13,12 @@
 //    AltGr + s            -> s-cedilla      AltGr + Shift + s  -> S-cedilla
 //    AltGr + c            -> c-cedilla      AltGr + Shift + c  -> C-cedilla
 //
-//  Nega o'ng Alt: chap Alt + Shift — Windows'da klaviatura tilini almashtirish
-//  yorlig'i. O'ng Alt (AltGr) unga tegmaydi, shuning uchun katta harf yozganda
-//  (AltGr + Shift + harf) til almashib ketmaydi. Foydalanuvchi trigger tugmani
-//  Sozlamalar oynasidan istalgan boshqa tugmaga o'zgartira oladi.
+//  Nega o'ng Alt: chap Alt matn muharrirlarining menyu tugmasi, o'ng Alt esa
+//  odatda bo'sh. DIQQAT: Windows'ning "chap Alt+Shift" til almashtirish
+//  yorlig'i aslida O'NG Alt+Shift bilan HAM otiladi (tajribada isbotlangan) —
+//  shuning uchun hook.cpp'da maxsus himoya bor: trigger bosilganda niqob-tap
+//  yuborilib, til almashishi va "yolg'iz Alt" menyu-rejimi o'chiriladi.
+//  Foydalanuvchi trigger tugmani Sozlamalardan boshqa tugmaga o'zgartira oladi.
 //
 //  Belgilarni almashtirish uchun pastdagi Unicode kodlarini o'zgartiring.
 //  (Escape shaklida yozilgan — kompilyator encoding'iga bog'liq emas.)
