@@ -2,8 +2,8 @@
 #include "config.h"   // TRIGGER_VK (standart trigger)
 #include <shlobj.h>   // SHGetFolderPathW, IShellLinkW (yorliq yaratish)
 
-// Standart qiymatlar (apo = oddiy apostrof ')
-Settings g_settings = { LANG_UZ, TRIGGER_VK, true, false, true, L'\'' };
+// Standart qiymatlar (apo = rasmiy tutuq belgisi ʻ U+02BB)
+Settings g_settings = { LANG_UZ, TRIGGER_VK, true, false, true, (wchar_t)0x02BB };
 
 static const wchar_t* kRunKey = L"Software\\Microsoft\\Windows\\CurrentVersion\\Run";
 static const wchar_t* kRunVal = L"Harfbek";
@@ -35,7 +35,7 @@ void Settings_Load()
     g_settings.firstRun     =       GetPrivateProfileIntW(L"general", L"FirstRun",     1,           ini) != 0;
     g_settings.runAtStartup =       GetPrivateProfileIntW(L"general", L"RunAtStartup", 0,           ini) != 0;
     g_settings.enabled      =       GetPrivateProfileIntW(L"general", L"Enabled",      1,           ini) != 0;
-    g_settings.apo          = (wchar_t)GetPrivateProfileIntW(L"general", L"Apostrophe",  0x27,        ini);
+    g_settings.apo          = (wchar_t)GetPrivateProfileIntW(L"general", L"Apostrophe",  0x2BB,       ini);
 
     if (g_settings.lang < 0 || g_settings.lang >= LANG_COUNT) g_settings.lang = LANG_UZ;
     // Faqat sinalgan trigger tugmalari qabul qilinadi. Eski versiyada saqlangan
@@ -43,7 +43,7 @@ void Settings_Load()
     // qolganda) standartga qaytadi.
     if (!Trigger_IsAllowed(g_settings.triggerVk))
         g_settings.triggerVk = TRIGGER_VK;
-    if (g_settings.apo == 0) g_settings.apo = L'\'';
+    if (g_settings.apo == 0) g_settings.apo = (wchar_t)0x02BB;
 }
 
 void Settings_Save()

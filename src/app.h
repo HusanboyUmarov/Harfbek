@@ -14,6 +14,8 @@
 #define WM_TRAYICON  (WM_APP + 1)
 // Modifikator "osilib qolgan"mi tekshirish (stuck-key himoyasi) — main thread'da
 #define WM_APP_MODCHECK  (WM_APP + 3)
+// Stuck-key tekshiruv taymerlari: ID = MODCHECK_TIMER_BASE + vk
+#define MODCHECK_TIMER_BASE  0x500
 // Ctrl+o'ng-tugma bosilganda o'girish menyusini ko'rsatish (wp=x, lp=y)
 #define WM_APP_CONVERTMENU  (WM_APP + 4)
 

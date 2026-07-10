@@ -106,13 +106,27 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
         return 0;
 
     case WM_APP_MODCHECK: {
-        // Real modifikator qo'yib yuborilgach, u hali ham "bosilgan" ko'rinsa —
-        // bu bizning qayta bosishimizdan osilib qolgan; majburan qo'yib yuboramiz.
+        // Real modifikator qo'yib yuborildi. Darhol tekshirib bo'lmaydi:
+        // bizning inyeksiya qilingan "qayta bosish" hodisamiz hali tizim
+        // navbatida bo'lishi mumkin (shunda GetAsyncKeyState "qo'yilgan" deb
+        // aldab qo'yadi, keyin esa modifikator osilib qoladi). Shu sababli
+        // qisqa taymer qo'yib, hamma hodisa o'tib bo'lgach tekshiramiz.
         UINT vk = (UINT)wp;
-        if (GetAsyncKeyState((int)vk) & 0x8000)
-            Hook_ForceModUp(vk);
+        SetTimer(hWnd, MODCHECK_TIMER_BASE + vk, 100, NULL);
         return 0;
     }
+
+    case WM_TIMER:
+        if (wp >= MODCHECK_TIMER_BASE && wp < MODCHECK_TIMER_BASE + 0x100) {
+            KillTimer(hWnd, wp);
+            UINT vk = (UINT)(wp - MODCHECK_TIMER_BASE);
+            // Fizik tugma qo'yib yuborilganiga qaramay hali "bosilgan" ko'rinsa —
+            // bu bizning qayta bosishimizdan osilib qolgan; majburan qo'yib yuboramiz.
+            if (GetAsyncKeyState((int)vk) & 0x8000)
+                Hook_ForceModUp(vk);
+            return 0;
+        }
+        break;
 
     case WM_APP_CONVERTMENU: {
         // Ctrl+o'ng-tugma bosildi: belgilangan matnni o'girish menyusini ko'rsatamiz.

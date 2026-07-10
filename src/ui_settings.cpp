@@ -100,8 +100,8 @@ bool Trigger_IsAllowed(UINT vk)
 // Apostrof variantlari (o' g' uchun chiqadigan belgi)
 struct ApoOpt { const wchar_t* label; wchar_t ch; };
 static const ApoOpt kApoOpts[] = {
+    { L"ʻ  ( oʻzbek )", (wchar_t)0x02BB },   // rasmiy tutuq belgisi (standart)
     { L"'  ( ' )",   L'\''     },   // U+0027 oddiy apostrof
-    { L"ʻ  ( oʻzbek )", (wchar_t)0x02BB },   // rasmiy tutuq belgisi
     { L"`  ( ` )",   L'`'      },   // U+0060 grave
     { L"’  ( ’ )", (wchar_t)0x2019 },        // egik apostrof
 };

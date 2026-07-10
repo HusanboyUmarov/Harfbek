@@ -78,6 +78,22 @@ static bool TriggerDown()
     }
 }
 
+// "Niqob" tugma (vk 0xE8 — Windows'da tayinlanmagan, hech narsa qilmaydi):
+// Alt bosilib-qo'yilgani orasida boshqa tugma "bosilgan"dek ko'rsatadi.
+// Busiz Windows bizning Alt ko'tarish/qayta-bosishimizni "Alt yolg'iz
+// bosildi" deb tushunib, oynaning menyu qatorini faollashtiradi (klaviatura
+// "yozmay qoladi") yoki Alt+Shift / Ctrl+Shift til almashtirishni ishga
+// tushiradi. Diqqat: SendInput wVk uchun 1..254 oraliqni talab qiladi —
+// 0xFF ISHLATMANG, butun paket rad etiladi.
+static void FillMask(INPUT& in, bool up)
+{
+    in = INPUT{};
+    in.type = INPUT_KEYBOARD;
+    in.ki.wVk = 0xE8;
+    in.ki.dwFlags = (up ? KEYEVENTF_KEYUP : 0);
+    in.ki.dwExtraInfo = kInjectSig;
+}
+
 // Maxsus harfni (Unicode) klaviaturaga yuborish.
 // Muhim: Alt/Ctrl bosilgan bo'lsa, ular menyu yoki yorliq (shortcut) rejimini
 // yoqib harfni "yutib" yubormasligi uchun ularni vaqtincha qo'yib turamiz,
@@ -91,8 +107,11 @@ static void SendUnicode(wchar_t ch)
 
     // Butun ketma-ketlikni BITTA SendInput'da yuboramiz (atomik): bu tartib
     // buzilishi va hook'ka ko'p qayta kirishning oldini oladi.
-    INPUT seq[4 + 2 + 4];
+    INPUT seq[2 + 4 + 2 + 4 + 2];
     int m = 0;
+
+    // 0) niqob: Alt ko'tarilishidan oldin "boshqa tugma bosildi" belgisi
+    if (n > 0) { FillMask(seq[m++], false); FillMask(seq[m++], true); }
 
     // 1) bosilgan modifikatorlarni ko'taramiz
     for (int i = 0; i < n; ++i) FillMod(seq[m++], down[i], true);
@@ -108,11 +127,16 @@ static void SendUnicode(wchar_t ch)
     // 3) modifikatorlarni qayta bosamiz (teskari tartibda)
     for (int i = n - 1; i >= 0; --i) FillMod(seq[m++], down[i], false);
 
-    SendInput(m, seq, sizeof(INPUT));
+    // 4) niqob: qayta bosilgan Alt keyin fizik qo'yib yuborilganda ham
+    //    "yolg'iz Alt" deb hisoblanmasligi uchun
+    if (n > 0) { FillMask(seq[m++], false); FillMask(seq[m++], true); }
 
-    // Modifikatorni qayta bosgan bo'lsak, keyingi ~1s ichida uni "osilib
-    // qolgan"ga qarshi tekshiramiz (pastdagi WM_APP_MODCHECK).
+    // Modifikatorni qayta bosamiz — haqiqiy keyup bizning qayta-bosishdan
+    // OLDIN kelib qolsa (tez qo'yib yuborilganda), stuck-tekshiruv (pastdagi
+    // WM_APP_MODCHECK) buni tuzatishi uchun vaqtni SendInput'dan oldin belgilaymiz.
     if (n > 0) g_repressTick = GetTickCount();
+
+    SendInput(m, seq, sizeof(INPUT));
 }
 
 // "Osilib qolgan" modifikatorni majburan qo'yib yuboradi (main thread'dan chaqiriladi).
@@ -207,6 +231,9 @@ static LRESULT CALLBACK MouseProc(int nCode, WPARAM wParam, LPARAM lParam)
         (wParam == WM_RBUTTONDOWN || wParam == WM_RBUTTONUP))
     {
         bool ctrl = (GetAsyncKeyState(VK_CONTROL) & 0x8000) != 0;
+        // AltGr'li layoutlarda o'ng Alt bosilganda Windows soxta LCtrl ham
+        // bosadi — bu holda foydalanuvchi Ctrl bosgani yo'q, e'tiborga olmaymiz.
+        if (ctrl && IsDown(VK_RMENU)) ctrl = false;
         if (ctrl) {
             if (wParam == WM_RBUTTONUP && g_hWnd) {
                 MSLLHOOKSTRUCT* m = (MSLLHOOKSTRUCT*)lParam;
