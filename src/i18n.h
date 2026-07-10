@@ -39,6 +39,9 @@ enum StrId {
     S_TRIG_RALT, S_TRIG_LALT, S_TRIG_BOTHALT, S_TRIG_RCTRL, S_TRIG_RSHIFT,
     S_TRIG_CAPS, S_TRIG_APPS, S_TRIG_SCROLL, S_TRIG_PAUSE, S_TRIG_F12,
 
+    // dasturni o'chirish (uninstall)
+    S_MENU_UNINSTALL, S_UNINST_CONFIRM,
+
     S_STR_COUNT
 };
 

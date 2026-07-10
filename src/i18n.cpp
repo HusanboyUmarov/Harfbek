@@ -130,6 +130,29 @@ static const wchar_t* STR[S_STR_COUNT][LANG_COUNT] = {
     /*S_TRIG_SCROLL*/     { L"Scroll Lock", L"Scroll Lock", L"Scroll Lock" },
     /*S_TRIG_PAUSE*/      { L"Pause", L"Pause", L"Pause" },
     /*S_TRIG_F12*/        { L"F12", L"F12", L"F12" },
+
+    // --- dasturni o'chirish (uninstall) ---
+    /*S_MENU_UNINSTALL*/  { L"Dasturni öçiriş...",
+                            L"Удалить программу...",
+                            L"Uninstall..." },
+    /*S_UNINST_CONFIRM*/  { L"Harfbek öçiriladi va barça ma'lumotlari tozalanadi:\r\n\r\n"
+                            L"  •  sozlamalar (AppData\\Harfbek)\r\n"
+                            L"  •  Windows bilan işga tuşiş yozuvi\r\n"
+                            L"  •  iş stolidagi yorliq\r\n\r\n"
+                            L"harfbek.exe fayli qoladi - qayta örnatiş uçun uni yana işga tuşiring.\r\n\r\n"
+                            L"Davom ettirilsinmi?",
+                            L"Harfbek будет удалён, все его данные будут очищены:\r\n\r\n"
+                            L"  •  настройки (AppData\\Harfbek)\r\n"
+                            L"  •  запись автозапуска Windows\r\n"
+                            L"  •  ярлык на рабочем столе\r\n\r\n"
+                            L"Файл harfbek.exe останется - для переустановки просто запустите его снова.\r\n\r\n"
+                            L"Продолжить?",
+                            L"Harfbek will be removed and all its data cleaned:\r\n\r\n"
+                            L"  •  settings (AppData\\Harfbek)\r\n"
+                            L"  •  Windows startup entry\r\n"
+                            L"  •  desktop shortcut\r\n\r\n"
+                            L"The harfbek.exe file will remain - to reinstall, just run it again.\r\n\r\n"
+                            L"Continue?" },
 };
 
 const wchar_t* T(StrId id)

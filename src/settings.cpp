@@ -105,6 +105,35 @@ void Shortcut_CreateDesktop()
     if (comInit) CoUninitialize();
 }
 
+// Dasturning barcha izlarini tozalaydi: sozlamalar papkasi, avtozapusk
+// yozuvi va ish stolidagi yorliq. Exe faylning o'zi qoladi - qayta
+// o'rnatish kerak bo'lsa, shu fayl ishga tushiriladi (birinchi ishga
+// tushirish kabi: til tanlash, qo'llanma, yorliq).
+void Uninstall_CleanData()
+{
+    // Avtozapusk yozuvi (HKCU\...\Run)
+    Startup_Set(false);
+
+    // %APPDATA%\Harfbek papkasi (settings.ini bilan birga)
+    wchar_t ini[MAX_PATH];
+    GetIniPath(ini, MAX_PATH);
+    DeleteFileW(ini);
+    wchar_t dir[MAX_PATH];
+    lstrcpyW(dir, ini);
+    for (int i = lstrlenW(dir) - 1; i >= 0; i--) {
+        if (dir[i] == L'\\') { dir[i] = 0; break; }
+    }
+    RemoveDirectoryW(dir);   // faqat bo'sh bo'lsa o'chadi - boshqa fayl bo'lsa tegmaydi
+
+    // Ish stolidagi yorliq
+    wchar_t desktop[MAX_PATH];
+    if (SUCCEEDED(SHGetFolderPathW(NULL, CSIDL_DESKTOPDIRECTORY, NULL, 0, desktop))) {
+        wchar_t lnk[MAX_PATH];
+        wsprintfW(lnk, L"%s\\Harfbek.lnk", desktop);
+        DeleteFileW(lnk);
+    }
+}
+
 bool Startup_IsEnabled()
 {
     HKEY k;

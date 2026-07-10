@@ -59,6 +59,13 @@ static void HandleCommand(HWND hWnd, int cmd)
     case CMD_LANG_UZ: SetLanguage(LANG_UZ); break;
     case CMD_LANG_RU: SetLanguage(LANG_RU); break;
     case CMD_LANG_EN: SetLanguage(LANG_EN); break;
+    case CMD_UNINSTALL:
+        if (MessageBoxW(hWnd, T(S_UNINST_CONFIRM), T(S_APP_TITLE),
+                        MB_YESNO | MB_ICONWARNING | MB_DEFBUTTON2) == IDYES) {
+            Uninstall_CleanData();   // sozlamalar, avtozapusk, yorliq
+            PostMessageW(hWnd, WM_CLOSE, 0, 0);
+        }
+        break;
     case CMD_EXIT:
         PostMessageW(hWnd, WM_CLOSE, 0, 0);
         break;
@@ -87,6 +94,7 @@ static void ShowTrayMenu(HWND hWnd)
     AppendMenuW(menu, MF_STRING | (g_settings.runAtStartup ? MF_CHECKED : 0),
                 CMD_STARTUP, T(S_MENU_STARTUP));
     AppendMenuW(menu, MF_SEPARATOR, 0, NULL);
+    AppendMenuW(menu, MF_STRING, CMD_UNINSTALL, T(S_MENU_UNINSTALL));
     AppendMenuW(menu, MF_STRING, CMD_EXIT, T(S_MENU_EXIT));
 
     SetForegroundWindow(hWnd);

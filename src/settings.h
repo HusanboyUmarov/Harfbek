@@ -25,3 +25,8 @@ void Startup_Set(bool enable);
 
 // Ish stolida "Harfbek.lnk" yorlig'ini yaratadi (bo'lsa - tegmaydi)
 void Shortcut_CreateDesktop();
+
+// Dasturni o'chirish: barcha izlarni tozalaydi (sozlamalar papkasi,
+// avtozapusk yozuvi, ish stolidagi yorliq). Exe faylning o'zi qoladi -
+// qayta o'rnatish uchun shu faylni ishga tushirish kifoya.
+void Uninstall_CleanData();

@@ -26,6 +26,7 @@ enum {
     CMD_TUTORIAL,
     CMD_ABOUT,
     CMD_STARTUP,
+    CMD_UNINSTALL,
     CMD_EXIT,
     CMD_LANG_UZ = 200,
     CMD_LANG_RU,
