@@ -115,7 +115,7 @@ title Harfbek build: bog'lanmoqda...
 echo   [link] harfbek.exe yig'ilmoqda...
 "!GPP!" -static -static-libgcc -static-libstdc++ -s ^
     !OBJS! !RESOBJ! -o harfbek.exe ^
-    -luser32 -lshell32 -lgdi32 -ladvapi32 -mwindows
+    -luser32 -lshell32 -lgdi32 -ladvapi32 -lole32 -luuid -mwindows
 if errorlevel 1 goto :xato
 if not exist harfbek.exe goto :xato
 

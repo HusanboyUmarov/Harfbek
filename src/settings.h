@@ -22,3 +22,6 @@ void Settings_Save();   // sozlamalarni faylga yozadi
 // Windows bilan ishga tushish (HKCU\...\Run)
 bool Startup_IsEnabled();
 void Startup_Set(bool enable);
+
+// Ish stolida "Harfbek.lnk" yorlig'ini yaratadi (bo'lsa - tegmaydi)
+void Shortcut_CreateDesktop();

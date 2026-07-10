@@ -194,6 +194,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR, int)
         UpdateTrayTip();
         ShowLicense(g_hWnd);        // litsenziya/ogohlantirish (tanlangan tilda)
         ShowTutorial(g_hWnd);
+        Shortcut_CreateDesktop();   // ish stolida yorliq
         g_settings.firstRun = false;
         Settings_Save();
     }

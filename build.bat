@@ -31,7 +31,7 @@ REM  src\*.cpp : barcha manba fayllar kompilyatsiya qilinadi.
 cl /nologo /EHsc /O2 /MT /utf-8 /DUNICODE /D_UNICODE ^
    src\*.cpp %RESFILE% ^
    /Fe:harfbek.exe ^
-   /link user32.lib shell32.lib gdi32.lib advapi32.lib /SUBSYSTEM:WINDOWS
+   /link user32.lib shell32.lib gdi32.lib advapi32.lib ole32.lib uuid.lib /SUBSYSTEM:WINDOWS
 
 if exist harfbek.exe (
     del /q *.obj 2>nul

@@ -1,5 +1,6 @@
 #include "app.h"      // Trigger_IsAllowed
 #include "config.h"   // TRIGGER_VK (standart trigger)
+#include <shlobj.h>   // SHGetFolderPathW, IShellLinkW (yorliq yaratish)
 
 // Standart qiymatlar (apo = oddiy apostrof ')
 Settings g_settings = { LANG_UZ, TRIGGER_VK, true, false, true, L'\'' };
@@ -60,6 +61,48 @@ void Settings_Save()
     WritePrivateProfileStringW(L"general", L"Enabled",      g_settings.enabled      ? L"1" : L"0", ini);
     wsprintfW(buf, L"%u", (unsigned)g_settings.apo);
     WritePrivateProfileStringW(L"general", L"Apostrophe", buf, ini);
+}
+
+// Ish stolida "Harfbek.lnk" yorlig'ini yaratadi. Yorliq allaqachon bo'lsa,
+// foydalanuvchi uni o'zgartirgan/ko'chirgan bo'lishi mumkin - tegmaymiz.
+void Shortcut_CreateDesktop()
+{
+    wchar_t desktop[MAX_PATH];
+    if (FAILED(SHGetFolderPathW(NULL, CSIDL_DESKTOPDIRECTORY, NULL, 0, desktop)))
+        return;
+
+    wchar_t lnk[MAX_PATH];
+    wsprintfW(lnk, L"%s\\Harfbek.lnk", desktop);
+    if (GetFileAttributesW(lnk) != INVALID_FILE_ATTRIBUTES)
+        return;
+
+    wchar_t exe[MAX_PATH];
+    if (!GetModuleFileNameW(NULL, exe, MAX_PATH))
+        return;
+
+    // Ish papkasi - exe turgan papka
+    wchar_t dir[MAX_PATH];
+    lstrcpyW(dir, exe);
+    for (int i = lstrlenW(dir) - 1; i >= 0; i--) {
+        if (dir[i] == L'\\') { dir[i] = 0; break; }
+    }
+
+    bool comInit = SUCCEEDED(CoInitializeEx(NULL, COINIT_APARTMENTTHREADED));
+    IShellLinkW* sl = NULL;
+    if (SUCCEEDED(CoCreateInstance(CLSID_ShellLink, NULL, CLSCTX_INPROC_SERVER,
+                                   IID_IShellLinkW, (void**)&sl))) {
+        sl->SetPath(exe);
+        sl->SetWorkingDirectory(dir);
+        sl->SetIconLocation(exe, 0);
+
+        IPersistFile* pf = NULL;
+        if (SUCCEEDED(sl->QueryInterface(IID_IPersistFile, (void**)&pf))) {
+            pf->Save(lnk, TRUE);
+            pf->Release();
+        }
+        sl->Release();
+    }
+    if (comInit) CoUninitialize();
 }
 
 bool Startup_IsEnabled()

@@ -31,7 +31,9 @@ bo'limida — `harfbek.exe` ni yuklab, ikki marta bosing. Bo'ldi!
 - Windows 10 va 11 da ishlaydi.
 
 Ishga tushgach, soat yonida binafsha **H** ikonka paydo bo'ladi. Unga o'ng tugma
-bosib Sozlamalar, Qo'llanma yoki Chiqish'ni tanlaysiz.
+bosib Sozlamalar, Qo'llanma yoki Chiqish'ni tanlaysiz. Birinchi ishga tushishda
+ish stolida **Harfbek yorlig'i** ham avtomatik yaratiladi — keyingi safar dasturni
+shu yorliqdan ochasiz.
 
 ## ✨ Imkoniyatlar
 
