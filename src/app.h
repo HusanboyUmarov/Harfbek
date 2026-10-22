@@ -10,6 +10,7 @@
 #include "i18n.h"
 #include "resource.h"
 #include "hotkeys.h"
+#include "ui_gfx.h"
 
 // Tray ikonka xabari
 #define WM_TRAYICON  (WM_APP + 1)
@@ -32,6 +33,7 @@ enum {
     CMD_UNINSTALL,
     CMD_EXIT,
     CMD_AUTOMODE,               // avto rejim (MODE_TRIGGER <-> MODE_AUTO)
+    CMD_PLAYGROUND,             // Sozlamalar -> sinov maydoni (flyout)
     CMD_LANG_UZ = 200,
     CMD_LANG_RU,
     CMD_LANG_EN,
@@ -70,6 +72,21 @@ void ShowTutorial(HWND parent);
 void ShowSettings(HWND parent);
 void ShowAbout(HWND parent);
 void ShowLicense(HWND parent);          // litsenziya / ogohlantirish
+
+// Sozlamalar oynasi kerakli sahifada (ui_settings.cpp). Oyna allaqachon ochiq
+// bo'lsa — mavjudi oldinga chiqadi va sahifaga o'tadi.
+// SP_PLAYGROUND — sinov maydoni (task 28; enum oxirida, sidebar'da "Rejim" dan keyin)
+enum SettingsPage { SP_GENERAL, SP_MODE, SP_HOTKEYS, SP_EXCLUDE, SP_ABOUT, SP_PLAYGROUND };
+void ShowSettingsPage(HWND parent, int page);
+
+// Rejim / yoqish almashuvi (main.cpp): saqlash, hook holati, tooltip, OSD,
+// ochiq flyout. Tray menyu, tezkor tugma va flyout shu ikkisidan o'tadi.
+void ToggleMode();
+void ToggleEnabled();
+
+// Tray flyout (ui_flyout.cpp) — tray chap tugma. anchor — ikonka markazi.
+void Flyout_Toggle(POINT anchor);
+void Flyout_Refresh();   // holat tashqaridan (hotkey) o'zgardi — ochiq bo'lsa yangilanadi
 
 // Ekrandagi qisqa bildirishnoma (ui_osd.cpp): fokus olmaydi, ~1.5 s dan keyin
 // yo'qoladi; qayta chaqiruv matnni yangilaydi. Faqat main thread'dan.

@@ -53,6 +53,14 @@ enum StrId {
     S_WIZ_3_TITLE, S_WIZ_3_BODY, S_WIZ_4_TITLE, S_WIZ_4_BODY,
     S_WIZ_5_TITLE, S_WIZ_5_BODY, S_WIZ_6_TITLE, S_WIZ_6_BODY,
 
+    // flyout, tezkor tugma yozish, istisnolar, sozlamalar sahifalari
+    S_FLY_ACTIVE, S_FLY_PAUSED, S_FLY_GUIDE, S_HK_RECORD,
+    S_HK_NONE, S_EX_EMPTY, S_NAV_ABOUT, S_SET_APPEARANCE_HINT,
+
+    // sinov maydoni (playground)
+    S_NAV_PLAYGROUND, S_PG_HINT, S_PG_PLACEHOLDER, S_PG_CHALLENGES, S_PG_CLEAR,
+    S_PG_COUNTER, S_PG_MODE_BADGE, S_PG_DONE, S_PG_UNSAVED, S_PG_TRY_NOW,
+
     S_STR_COUNT
 };
 

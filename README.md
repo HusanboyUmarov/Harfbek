@@ -51,6 +51,12 @@ shu yorliqdan ochasiz.
   bossangiz, asl yozuv qaytadi (`ş` → `sh`) — inglizcha so'zlar uchun qulay.
   Terminal oynalarida ishlamaydi. Tray menyudan yoki Sozlamalardan yoqiladi.
   Trigger rejimi bilan bir vaqtda ishlamaydi — biri tanlanadi.
+- **Zamonaviy interfeys** — yorug' va qorong'i mavzu Windows sozlamasiga qarab
+  avtomatik tanlanadi; tray ikonkaga chap tugma bilan tezkor panel ochiladi
+  (o'ng tugma — oddiy menyu).
+- **Sinab köriş maydoni** — Sozlamalardagi alohida sahifa: shu yerda yozib, Harfbek
+  joriy rejimda qanday ishlashini jonli ko'rasiz; maxsus harflar sanagichi va kichik
+  sinovlar bor. Yozganingiz hech qayerga saqlanmaydi.
 - **Tanişuv oynasi** — birinchi ishga tushganda ochiladi: yangi alifbo, ikki rejim
   va tezkor tugmalar haqida qisqa tushuntirish, rejimni shu yerning o'zida tanlaysiz.
   Keyin tray menyudagi **Tanişuv...** orqali qayta ochish mumkin.

@@ -98,7 +98,10 @@ static bool BringModalToFront(HWND hWnd)
 {
     if (IsWindowEnabled(hWnd)) return false;
     HWND pop = GetLastActivePopup(hWnd);
-    if (pop && pop != hWnd) SetForegroundWindow(pop);
+    if (pop && pop != hWnd) {
+        if (IsIconic(pop)) ShowWindow(pop, SW_RESTORE);   // Sozlamalar minimallashtirilgan bo'lishi mumkin
+        SetForegroundWindow(pop);
+    }
     return true;
 }
 
@@ -109,27 +112,63 @@ static void SetLanguage(Lang l)
     UpdateTrayTip();
 }
 
-// Rejim / yoqish o'zgarishi — tray menyu va tezkor tugma shu ikki funksiyadan
-// o'tadi: saqlash, hook holatini tozalash (trigger va avto bufer yangi holatga
-// o'tmasin), tooltip, so'ng (yoqilgan bo'lsa) ekrandagi bildirishnoma.
-static void ToggleMode()
+// Rejim / yoqish o'zgarishi — tray menyu, tezkor tugma va flyout shu ikki
+// funksiyadan o'tadi: saqlash, hook holatini tozalash (trigger va avto bufer
+// yangi holatga o'tmasin), tooltip, ochiq flyout, so'ng (yoqilgan bo'lsa)
+// ekrandagi bildirishnoma.
+void ToggleMode()
 {
     g_settings.mode = (g_settings.mode == MODE_AUTO) ? MODE_TRIGGER : MODE_AUTO;
     Settings_Save();
     Hook_ResetTriggerState();
     UpdateTrayTip();
+    Flyout_Refresh();
     if (g_settings.notify)
         Osd_Show(T(g_settings.mode == MODE_AUTO ? S_OSD_MODE_AUTO : S_OSD_MODE_TRIGGER));
 }
 
-static void ToggleEnabled()
+void ToggleEnabled()
 {
     g_settings.enabled = !g_settings.enabled;
     Settings_Save();
     Hook_ResetTriggerState();
     UpdateTrayTip();
+    Flyout_Refresh();
     if (g_settings.notify)
         Osd_Show(T(g_settings.enabled ? S_OSD_ENABLED : S_OSD_DISABLED));
+}
+
+// Tray ikonkasining ekrandagi markazi (flyout shu yerga yopishadi).
+// Shell_NotifyIconGetRect (Win7+) eski MinGW headerlarida bo'lmasligi mumkin —
+// dinamik; topilmasa sichqoncha joyi.
+static POINT TrayAnchor(HWND hWnd)
+{
+    struct NotifyIconId { DWORD cbSize; HWND hWnd; UINT uID; GUID guidItem; };
+    typedef HRESULT (WINAPI *GetRectFn)(const NotifyIconId*, RECT*);
+    POINT pt; GetCursorPos(&pt);
+    HMODULE sh = GetModuleHandleW(L"shell32.dll");
+    GetRectFn fn = sh ? (GetRectFn)(void*)GetProcAddress(sh, "Shell_NotifyIconGetRect") : NULL;
+    NotifyIconId id = { sizeof(id), hWnd, g_nid.uID, {} };
+    RECT r;
+    if (fn && SUCCEEDED(fn(&id, &r))) {
+        pt.x = (r.left + r.right) / 2;
+        pt.y = (r.top + r.bottom) / 2;
+    }
+    return pt;
+}
+
+// Mavzu (yorug'/qorong'i, yuqori kontrast) o'zgardi: ranglar qayta o'qiladi,
+// thread'imizning barcha ochiq oynalari WM_THEMECHANGED bilan qayta chiziladi.
+static BOOL CALLBACK ThemeChangedProc(HWND w, LPARAM)
+{
+    if (w != g_hWnd) SendMessageW(w, WM_THEMECHANGED, 0, 0);
+    return TRUE;
+}
+
+static void OnThemeChanged()
+{
+    Ui_RefreshTheme();
+    EnumThreadWindows(GetCurrentThreadId(), ThemeChangedProc, 0);
 }
 
 // Belgilangan matnni o'girish menyusi (ikki yo'nalish) — Ctrl+o'ng-tugma va
@@ -185,7 +224,11 @@ static void HandleCommand(HWND hWnd, int cmd)
         ToggleEnabled();
         break;
     case CMD_SETTINGS:
-        ShowSettings(hWnd);
+        ShowSettingsPage(hWnd, SP_GENERAL);
+        UpdateTrayTip();
+        break;
+    case CMD_PLAYGROUND:
+        ShowSettingsPage(hWnd, SP_PLAYGROUND);
         UpdateTrayTip();
         break;
     case CMD_AUTOMODE:
@@ -197,6 +240,7 @@ static void HandleCommand(HWND hWnd, int cmd)
         break;
     case CMD_ABOUT:
         ShowAbout(hWnd);
+        UpdateTrayTip();            // "Haqida" — Sozlamalar sahifasi, unda rejim/til o'zgargan bo'lishi mumkin
         break;
     case CMD_STARTUP:
         // registrdagi haqiqiy holatdan almashtiramiz (Sozlamalar oynasi ham shundan o'qiydi)
@@ -283,11 +327,31 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
     switch (msg)
     {
     case WM_TRAYICON:
+        // Chap tugma — flyout panel, o'ng — native menyu. Modal oyna ochiq
+        // bo'lsa hech biri ochilmaydi, modal oldinga chiqadi.
         if (LOWORD(lp) == WM_RBUTTONUP || LOWORD(lp) == WM_LBUTTONUP) {
             if (g_menuOpen || BringModalToFront(hWnd)) return 0;
-            ShowTrayMenu(hWnd);
+            if (LOWORD(lp) == WM_LBUTTONUP) Flyout_Toggle(TrayAnchor(hWnd));
+            else                            ShowTrayMenu(hWnd);
         }
         return 0;
+
+    case WM_COMMAND:
+        // Flyout tugmalari (Sozlamalar, Tanişuv, Çiqiş) — flyout yopilgach keladi.
+        // lp != 0 — control bildirishnomasi (bizda yo'q), e'tiborsiz.
+        if (lp || BringModalToFront(hWnd)) return 0;
+        HandleCommand(hWnd, LOWORD(wp));
+        return 0;
+
+    case WM_SETTINGCHANGE:
+        if ((lp && lstrcmpiW((const wchar_t*)lp, L"ImmersiveColorSet") == 0) ||
+            wp == SPI_SETHIGHCONTRAST)
+            OnThemeChanged();
+        break;
+
+    case WM_SYSCOLORCHANGE:
+        OnThemeChanged();
+        break;
 
     case WM_APP_MODCHECK: {
         // Real modifikator qo'yib yuborildi. Darhol tekshirib bo'lmaydi:

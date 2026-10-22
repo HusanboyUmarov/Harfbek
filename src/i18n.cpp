@@ -243,6 +243,37 @@ static const wchar_t* STR[S_STR_COUNT][LANG_COUNT] = {
     /*S_WIZ_6_BODY*/      { L"Harfbek soat yonidagi ikonka orqali boşqariladi.",
                             L"Harfbek управляется через значок возле часов.",
                             L"Harfbek is controlled from the tray icon near the clock." },
+
+    // --- flyout, tezkor tugma yozish, istisnolar, sozlamalar sahifalari ---
+    /*S_FLY_ACTIVE*/      { L"Faol", L"Активен", L"Active" },
+    /*S_FLY_PAUSED*/      { L"Töxtatilgan", L"Приостановлен", L"Paused" },
+    /*S_FLY_GUIDE*/       { L"Tanişuv", L"Знакомство", L"Getting started" },
+    /*S_HK_RECORD*/       { L"Tugmalarni bosing...", L"Нажмите клавиши...", L"Press the keys..." },
+    /*S_HK_NONE*/         { L"Yöq", L"Нет", L"None" },
+    /*S_EX_EMPTY*/        { L"Hali istisno yöq", L"Исключений пока нет", L"No exclusions yet" },
+    /*S_NAV_ABOUT*/       { L"Haqida", L"О программе", L"About" },
+    /*S_SET_APPEARANCE_HINT*/ { L"Mavzu Windows sozlamasiga qarab avtomatik tanlanadi",
+                            L"Тема выбирается автоматически по настройкам Windows",
+                            L"The theme follows your Windows setting automatically" },
+
+    // --- sinov maydoni (playground) ---
+    /*S_NAV_PLAYGROUND*/  { L"Sinab köriş", L"Попробовать", L"Try it out" },
+    /*S_PG_HINT*/         { L"Shu yerda yozib köring — Harfbek joriy rejimda işlaydi",
+                            L"Пишите здесь — Harfbek работает в текущем режиме",
+                            L"Type here — Harfbek works in the current mode" },
+    /*S_PG_PLACEHOLDER*/  { L"Yozing: o'zbek, Toshkent, cho'l...",
+                            L"Пишите: o'zbek, Toshkent, cho'l...",
+                            L"Type: o'zbek, Toshkent, cho'l..." },
+    /*S_PG_CHALLENGES*/   { L"Kiçik sinovlar", L"Мини-задания", L"Mini challenges" },
+    /*S_PG_CLEAR*/        { L"Tozalaş", L"Очистить", L"Clear" },
+    // S_PG_COUNTER da aynan bitta %d, S_PG_MODE_BADGE da aynan bitta %s (S_OSD_MODE_* nomi) bor.
+    /*S_PG_COUNTER*/      { L"%d ta maxsus harf", L"Особых букв: %d", L"Special letters: %d" },
+    /*S_PG_MODE_BADGE*/   { L"Joriy rejim: %s", L"Текущий режим: %s", L"Current mode: %s" },
+    /*S_PG_DONE*/         { L"Barçasi bajarildi!", L"Всё выполнено!", L"All done!" },
+    /*S_PG_UNSAVED*/      { L"Rejim özgartirildi — sinaş uçun avval saqlang",
+                            L"Режим изменён — чтобы попробовать, сначала сохраните",
+                            L"Mode changed — save first to try it" },
+    /*S_PG_TRY_NOW*/      { L"Hoziroq sinab köring", L"Попробовать сейчас", L"Try it now" },
 };
 
 const wchar_t* T(StrId id)
