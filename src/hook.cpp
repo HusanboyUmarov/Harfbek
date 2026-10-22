@@ -305,9 +305,33 @@ static void SendMaskTap()
 static AutoState g_auto       = {};     // oxirgi belgi va undo ma'lumoti
 static HWND      g_autoFg     = NULL;   // oxirgi foreground oyna (almashsa holat tozalanadi)
 static DWORD     g_autoFgTid  = 0;      // uning thread'i (klaviatura layout'i shu thread'niki)
-static bool      g_autoFgTerm = false;  // u terminalmi (har tugmada GetClassName shart emas)
+static bool      g_autoFgTerm = false;  // u terminal yoki istisno ilovami (har tugmada tekshirmaymiz)
 
-static bool IsTerminalWindow(HWND w);   // pastda (Ctrl+o'ng-tugma bilan umumiy ro'yxat)
+
+// Foreground oyna istisno ilovalar ro'yxatidagi dasturnikimi (settings.h).
+// Faqat oyna almashganda chaqiriladi (natija g_autoFgTerm da keshlanadi);
+// ro'yxat bo'sh bo'lsa jarayon ochilmaydi. Heap ishlatilmaydi — stek buferlari.
+static bool IsExcludedWindow(HWND w)
+{
+    wchar_t probe[2];
+    Settings_GetExcludes(probe, 2);
+    if (!probe[0]) return false;
+
+    DWORD pid = 0;
+    GetWindowThreadProcessId(w, &pid);
+    if (!pid) return false;
+    HANDLE h = OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, FALSE, pid);
+    if (!h) return false;                       // ochib bo'lmadi — istisno emas deb hisoblaymiz
+    wchar_t path[MAX_PATH];
+    DWORD   n = MAX_PATH;
+    bool    ok = QueryFullProcessImageNameW(h, 0, path, &n) != 0;
+    CloseHandle(h);
+    if (!ok) return false;
+    const wchar_t* name = path;
+    for (const wchar_t* q = path; *q; ++q)      // to'liq yo'l -> fayl nomi
+        if (*q == L'\\') name = q + 1;
+    return Settings_IsExcluded(name);
+}
 
 static void AutoResetAll()
 {
@@ -378,9 +402,9 @@ static bool AutoKeyDown(const KBDLLHOOKSTRUCT* k)
         Auto_Reset(g_auto);
         g_autoFg     = fg;
         g_autoFgTid  = fg ? GetWindowThreadProcessId(fg, NULL) : 0;
-        g_autoFgTerm = IsTerminalWindow(fg);
+        g_autoFgTerm = fg && (Hook_IsTerminalWindow(fg) || IsExcludedWindow(fg));
     }
-    if (!fg || g_autoFgTerm) return false;   // terminalda avto rejim ishlamaydi
+    if (!fg || g_autoFgTerm) return false;   // terminal va istisno ilovalarda avto rejim ishlamaydi
 
     if (vk == VK_BACK) {
         AutoAction a = Auto_OnBackspace(g_auto);
@@ -406,7 +430,7 @@ static bool AutoKeyDown(const KBDLLHOOKSTRUCT* k)
         ch = c;                                 // Shift bilan (US: ") apostrof emas
     }
 
-    AutoAction a = Auto_OnChar(g_auto, ch);
+    AutoAction a = Auto_OnChar(g_auto, ch, g_settings.autoRules);
     if (a.kind != AUTO_REPLACE) return false;
     AutoSend(a.text, a.len);                    // oldingi harfni o'chirib, maxsus harfni yozamiz
     return true;                                // apostrof / h tugmasining o'zi yutiladi
@@ -537,7 +561,7 @@ static const wchar_t* const kTerminalClasses[] = {
 };
 
 // GetClassNameW xabar yubormaydi — hook ichida chaqirish xavfsiz (bloklanmaydi).
-static bool IsTerminalWindow(HWND w)
+bool Hook_IsTerminalWindow(HWND w)
 {
     wchar_t cls[64];
     if (!w || !GetClassNameW(w, cls, 64)) return false;
@@ -575,7 +599,7 @@ static LRESULT CALLBACK MouseProc(int nCode, WPARAM wParam, LPARAM lParam)
                 // bosishni ilovaning o'ziga qoldiramiz.
                 g_rDownEaten = ctrl && g_settings.enabled && g_hWnd &&
                                IsWindowEnabled(g_hWnd) &&
-                               !IsTerminalWindow(GetForegroundWindow());
+                               !Hook_IsTerminalWindow(GetForegroundWindow());
                 if (g_rDownEaten) return 1;   // o'zimizning menyu uchun bloklaymiz
             } else if (g_rDownEaten) {
                 // DOWN yutilgan edi — UP ham yutiladi va menyu shu yerda ochiladi

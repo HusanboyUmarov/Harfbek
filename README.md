@@ -31,7 +31,7 @@ bo'limida — `harfbek.exe` ni yuklab, ikki marta bosing. Bo'ldi!
 - Windows 10 va 11 da ishlaydi.
 
 Ishga tushgach, soat yonida binafsha **H** ikonka paydo bo'ladi. Unga o'ng tugma
-bosib Sozlamalar, Qo'llanma yoki Chiqish'ni tanlaysiz. Birinchi ishga tushishda
+bosib Sozlamalar, Tanişuv yoki Çiqiş'ni tanlaysiz. Birinchi ishga tushishda
 ish stolida **Harfbek yorlig'i** ham avtomatik yaratiladi — keyingi safar dasturni
 shu yorliqdan ochasiz.
 
@@ -51,6 +51,20 @@ shu yorliqdan ochasiz.
   bossangiz, asl yozuv qaytadi (`ş` → `sh`) — inglizcha so'zlar uchun qulay.
   Terminal oynalarida ishlamaydi. Tray menyudan yoki Sozlamalardan yoqiladi.
   Trigger rejimi bilan bir vaqtda ishlamaydi — biri tanlanadi.
+- **Tanişuv oynasi** — birinchi ishga tushganda ochiladi: yangi alifbo, ikki rejim
+  va tezkor tugmalar haqida qisqa tushuntirish, rejimni shu yerning o'zida tanlaysiz.
+  Keyin tray menyudagi **Tanişuv...** orqali qayta ochish mumkin.
+- **Sozlamalar tablari** — Umumiy | Rejim | Tezkor tugmalar | Istisnolar.
+- **Tezkor tugmalar** (Sozlamalarda o'zgartiriladi): rejimni almashtirish
+  `Ctrl+Shift+F9`, yoqish/o'chirish `Ctrl+Shift+F10`, belgilangan matnni o'girish
+  `Ctrl+Shift+F11`.
+- **Istisno dasturlar** — avto rejim ishlamaydigan dasturlar ro'yxati (terminallar
+  doim istisno). Ro'yxatga dastur nomini (masalan `code.exe`) yozib yoki
+  **Tanlaş...** tugmasi bilan `.exe` faylini tanlab qo'shasiz.
+- **Ekrandagi bildirishnoma** — rejim yoki yoqish/o'chirish o'zgarganda kichik xabar
+  qisqa vaqtga chiqadi (Sozlamalarda o'chirib qo'yish mumkin).
+- **Avto rejim harflari** — `o'`, `g'`, `sh`, `ch` ning har birini alohida yoqish
+  yoki o'chirish mumkin (Sozlamalar → Rejim tabi, avto rejim tanlanganda).
 - **Trigger tugmani tanlash** — 10 ta sinalgan variant: o'ng Alt (AltGr), chap Alt,
   ikkala Alt, o'ng Ctrl, o'ng Shift, CapsLock, Menyu tugmasi, Scroll Lock, Pause, F12.
 - **3 til interfeysi** — o'zbekcha, ruscha, inglizcha.
@@ -111,7 +125,7 @@ Skript hammasini o'zi qiladi:
 
 > **Build `Permission denied` bilan yiqildimi?** Harfbek **administrator
 > huquqida** ishlab turgan bo'lsa, build skripti uni avtomatik yopolmaydi va
-> exe ustiga yoza olmaydi. Tray'dagi **H** ikonkaga o'ng tugma → **Chiqish**
+> exe ustiga yoza olmaydi. Tray'dagi **H** ikonkaga o'ng tugma → **Çiqiş**
 > qilib, keyin build'ni qayta ishga tushiring. (Oddiy huquqda ishlayotgan
 > bo'lsa, skript o'zi yopadi — hech narsa qilish shart emas.)
 

@@ -9,6 +9,7 @@
 #include "settings.h"
 #include "i18n.h"
 #include "resource.h"
+#include "hotkeys.h"
 
 // Tray ikonka xabari
 #define WM_TRAYICON  (WM_APP + 1)
@@ -50,6 +51,10 @@ void Hook_ForceModUp(UINT vk);   // "osilib qolgan" modifikatorni majburan qo'yi
 bool Trigger_IsModifier(UINT vk);   // Alt/Ctrl/Shift oilasimi (yutilmaydigan trigger)
 bool Trigger_IsAllowed(UINT vk);    // sinalgan trigger ro'yxatida bormi (ui_settings.cpp)
 void Hook_ResetTriggerState();      // trigger o'zgarganda kuzatuv holatini tozalaydi
+// Oyna terminalmi (cmd/PowerShell, Windows Terminal, mintty...; ro'yxat hook.cpp da).
+// Terminalda Ctrl+o'ng-tugma, o'girish hotkey'i va avto rejim ishlamaydi.
+// Xabar yubormaydi — istalgan thread'dan chaqirish mumkin.
+bool Hook_IsTerminalWindow(HWND w);
 
 // Trigger tugmaning qisqa keycap nomi, masalan "AltGr" (ui_settings.cpp da aniqlanadi;
 // qo'llanma va tray tooltip uchun)
@@ -65,3 +70,7 @@ void ShowTutorial(HWND parent);
 void ShowSettings(HWND parent);
 void ShowAbout(HWND parent);
 void ShowLicense(HWND parent);          // litsenziya / ogohlantirish
+
+// Ekrandagi qisqa bildirishnoma (ui_osd.cpp): fokus olmaydi, ~1.5 s dan keyin
+// yo'qoladi; qayta chaqiruv matnni yangilaydi. Faqat main thread'dan.
+void Osd_Show(const wchar_t* text);

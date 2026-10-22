@@ -20,12 +20,34 @@ struct Settings {
     bool enabled;       // almashtirish yoqilganmi
     wchar_t apo;        // o'girishda o'g' /o'g' uchun apostrof belgisi (', `, ʻ ...)
     InputMode mode;     // yozish rejimi (trigger yoki avto)
+    // Tezkor tugmalar — HKM_GETHOTKEY formati: LOBYTE = vk, HIBYTE = HOTKEYF_*
+    // (SHIFT 1, CONTROL 2, ALT 4, EXT 8); 0 = o'chiq
+    WORD hkMode;        // rejimni almashtirish
+    WORD hkEnable;      // yoqish/o'chirish
+    WORD hkConvert;     // matnni o'girish menyusi
+    bool notify;        // rejim/yoqish o'zgarganda ekranda bildirishnoma
+    UINT autoRules;     // avto rejim qoidalari (AUTO_RULE_* bitlari)
 };
+
+// Avto rejim qoidalari (Settings::autoRules bitlari)
+#define AUTO_RULE_O   1   // o' -> ö
+#define AUTO_RULE_G   2   // g' -> ğ
+#define AUTO_RULE_SH  4   // sh -> ş
+#define AUTO_RULE_CH  8   // ch -> ç
+#define AUTO_RULE_ALL 0xF
 
 extern Settings g_settings;
 
 void Settings_Load();   // sozlamalarni fayldan o'qiydi (bo'lmasa firstRun = true)
-void Settings_Save();   // sozlamalarni faylga yozadi
+void Settings_Save();   // sozlamalarni faylga yozadi (istisnolar ro'yxati bilan)
+
+// Istisno ilovalar (avto rejim bu dasturlarda ishlamaydi): ';' bilan ajratilgan
+// exe nomlari ("code.exe;chrome.exe"), kichik harfda, maks 1023 belgi.
+// Thread-xavfsiz — hook thread'i ham o'qiydi.
+void Settings_GetExcludes(wchar_t* out, int n);
+void Settings_SetExcludes(const wchar_t* list);
+// Exe nomi (faqat fayl nomi, istalgan registrda) ro'yxatda bormi (hook thread'i uchun)
+bool Settings_IsExcluded(const wchar_t* exeName);
 
 // Windows bilan ishga tushish (HKCU\...\Run)
 bool Startup_IsEnabled();

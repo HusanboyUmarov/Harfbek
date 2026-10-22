@@ -9,6 +9,7 @@
 // =====================================================================
 #include "app.h"
 #include <shellapi.h>
+#include <commctrl.h>   // InitCommonControlsEx
 
 HINSTANCE g_hInst = NULL;
 HWND      g_hWnd  = NULL;
@@ -108,27 +109,91 @@ static void SetLanguage(Lang l)
     UpdateTrayTip();
 }
 
+// Rejim / yoqish o'zgarishi — tray menyu va tezkor tugma shu ikki funksiyadan
+// o'tadi: saqlash, hook holatini tozalash (trigger va avto bufer yangi holatga
+// o'tmasin), tooltip, so'ng (yoqilgan bo'lsa) ekrandagi bildirishnoma.
+static void ToggleMode()
+{
+    g_settings.mode = (g_settings.mode == MODE_AUTO) ? MODE_TRIGGER : MODE_AUTO;
+    Settings_Save();
+    Hook_ResetTriggerState();
+    UpdateTrayTip();
+    if (g_settings.notify)
+        Osd_Show(T(g_settings.mode == MODE_AUTO ? S_OSD_MODE_AUTO : S_OSD_MODE_TRIGGER));
+}
+
+static void ToggleEnabled()
+{
+    g_settings.enabled = !g_settings.enabled;
+    Settings_Save();
+    Hook_ResetTriggerState();
+    UpdateTrayTip();
+    if (g_settings.notify)
+        Osd_Show(T(g_settings.enabled ? S_OSD_ENABLED : S_OSD_DISABLED));
+}
+
+// Belgilangan matnni o'girish menyusi (ikki yo'nalish) — Ctrl+o'ng-tugma va
+// tezkor tugma uchun umumiy. Modal oynamiz yoki boshqa menyumiz ochiq bo'lsa
+// ochmaymiz. Terminalda ham — u yerda bizning Ctrl+C SIGINT bo'lib jarayonni
+// to'xtatadi (Ctrl+o'ng-tugma yo'lini hook o'zi filtrlaydi, hotkey yo'li esa
+// faqat shu yerdan o'tadi).
+static void ShowConvertMenu(HWND hWnd, int x, int y)
+{
+    if (g_menuOpen || !IsWindowEnabled(hWnd)) return;
+    HWND target = GetForegroundWindow();     // matn shu oynada belgilangan
+    if (Hook_IsTerminalWindow(target)) return;
+    HMENU menu = CreatePopupMenu();
+    AppendMenuW(menu, MF_STRING, CMD_CONV_TODIGRAPH, T(S_CONV_TODIGRAPH));
+    AppendMenuW(menu, MF_STRING, CMD_CONV_TOSPECIAL, T(S_CONV_TOSPECIAL));
+    SetForegroundWindow(hWnd);
+    g_menuOpen = true;
+    int cmd = TrackPopupMenu(menu, TPM_RIGHTBUTTON | TPM_RETURNCMD, x, y, 0, hWnd, NULL);
+    g_menuOpen = false;
+    DestroyMenu(menu);
+    PostMessageW(hWnd, WM_NULL, 0, 0);       // menyu to'g'ri yopilishi uchun
+    if (cmd == CMD_CONV_TODIGRAPH || cmd == CMD_CONV_TOSPECIAL) {
+        if (target) SetForegroundWindow(target);   // fokusni matn oynasiga qaytaramiz
+        TextConvert_Run(cmd == CMD_CONV_TODIGRAPH);
+    }
+}
+
+// Tezkor tugma bilan o'girish: menyu foreground oynadagi caret ostida
+// (GetGUIThreadInfo). Caret'ni tizimga bildirmaydigan ilovalarda (ko'p
+// Chromium/Electron, Word) — sichqoncha kursori yonida.
+static void ShowConvertMenuAtCaret(HWND hWnd)
+{
+    if (g_menuOpen || !IsWindowEnabled(hWnd)) return;
+    HWND fg = GetForegroundWindow();
+    if (Hook_IsTerminalWindow(fg)) return;   // terminal — hech narsa qilmaymiz
+    POINT pt;
+    GetCursorPos(&pt);
+    GUITHREADINFO gti = {};
+    gti.cbSize = sizeof(gti);
+    if (fg && GetGUIThreadInfo(GetWindowThreadProcessId(fg, NULL), &gti) && gti.hwndCaret) {
+        POINT c = { gti.rcCaret.left, gti.rcCaret.bottom };
+        if (ClientToScreen(gti.hwndCaret, &c)) pt = c;
+    }
+    ShowConvertMenu(hWnd, pt.x, pt.y);
+}
+
 // Menyu buyrug'ini bajaradi
 static void HandleCommand(HWND hWnd, int cmd)
 {
     switch (cmd)
     {
     case CMD_TOGGLE_ENABLED:
-        g_settings.enabled = !g_settings.enabled;
-        Settings_Save();
+        ToggleEnabled();
         break;
     case CMD_SETTINGS:
         ShowSettings(hWnd);
         UpdateTrayTip();
         break;
     case CMD_AUTOMODE:
-        g_settings.mode = (g_settings.mode == MODE_AUTO) ? MODE_TRIGGER : MODE_AUTO;
-        Settings_Save();
-        Hook_ResetTriggerState();   // trigger va avto bufer holati yangi rejimga o'tmasin
-        UpdateTrayTip();
+        ToggleMode();
         break;
     case CMD_TUTORIAL:
         ShowTutorial(hWnd);
+        UpdateTrayTip();            // tanishtiruvda rejim tanlangan bo'lishi mumkin
         break;
     case CMD_ABOUT:
         ShowAbout(hWnd);
@@ -155,18 +220,34 @@ static void HandleCommand(HWND hWnd, int cmd)
     }
 }
 
+// Menyu bandi matni: "Yoqilgan\tCtrl+Shift+F10" (tezkor tugma bo'lsa o'ng
+// ustunda ko'rinadi), aks holda faqat nom.
+static void MenuTextWithHotkey(StrId id, WORD hk, wchar_t* out, int n)
+{
+    wchar_t key[64];
+    Hotkey_Format(hk, key, 64);
+    if (!key[0]) { lstrcpynW(out, T(id), n); return; }
+    wchar_t buf[512];
+    wsprintfW(buf, L"%s\t%s", T(id), key);
+    lstrcpynW(out, buf, n);
+}
+
 // Tray menyusini ochadi
 static void ShowTrayMenu(HWND hWnd)
 {
     POINT pt; GetCursorPos(&pt);
 
+    wchar_t txtEnabled[256], txtAuto[256];
+    MenuTextWithHotkey(S_MENU_ENABLED,  g_settings.hkEnable, txtEnabled, 256);
+    MenuTextWithHotkey(S_MENU_AUTOMODE, g_settings.hkMode,   txtAuto,    256);
+
     HMENU menu = CreatePopupMenu();
     AppendMenuW(menu, MF_STRING | (g_settings.enabled ? MF_CHECKED : 0),
-                CMD_TOGGLE_ENABLED, T(S_MENU_ENABLED));
+                CMD_TOGGLE_ENABLED, txtEnabled);
     AppendMenuW(menu, MF_SEPARATOR, 0, NULL);
     AppendMenuW(menu, MF_STRING, CMD_SETTINGS, T(S_MENU_SETTINGS));
     AppendMenuW(menu, MF_STRING | (g_settings.mode == MODE_AUTO ? MF_CHECKED : 0),
-                CMD_AUTOMODE, T(S_MENU_AUTOMODE));
+                CMD_AUTOMODE, txtAuto);
 
     HMENU langMenu = CreatePopupMenu();
     AppendMenuW(langMenu, MF_STRING | (g_settings.lang == LANG_UZ ? MF_CHECKED : 0), CMD_LANG_UZ, L"Özbekça");
@@ -236,30 +317,25 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
         }
         break;
 
-    case WM_APP_CONVERTMENU: {
+    case WM_APP_CONVERTMENU:
         // Ctrl+o'ng-tugma bosildi: belgilangan matnni o'girish menyusini ko'rsatamiz.
-        // Modal oynamiz yoki boshqa menyumiz ochiq bo'lsa ochmaymiz (hook buni
-        // odatda o'zi tekshiradi; bu — oraliqda holat o'zgargan holat uchun).
-        if (g_menuOpen || !IsWindowEnabled(hWnd)) return 0;
-        int x = (int)(LONG)wp, y = (int)(LONG)lp;
-        HWND target = GetForegroundWindow();     // matn shu oynada belgilangan
-        HMENU menu = CreatePopupMenu();
-        AppendMenuW(menu, MF_STRING, CMD_CONV_TODIGRAPH, T(S_CONV_TODIGRAPH));
-        AppendMenuW(menu, MF_STRING, CMD_CONV_TOSPECIAL, T(S_CONV_TOSPECIAL));
-        SetForegroundWindow(hWnd);
-        g_menuOpen = true;
-        int cmd = TrackPopupMenu(menu, TPM_RIGHTBUTTON | TPM_RETURNCMD, x, y, 0, hWnd, NULL);
-        g_menuOpen = false;
-        DestroyMenu(menu);
-        PostMessageW(hWnd, WM_NULL, 0, 0);       // menyu to'g'ri yopilishi uchun
-        if (cmd == CMD_CONV_TODIGRAPH || cmd == CMD_CONV_TOSPECIAL) {
-            if (target) SetForegroundWindow(target);   // fokusni matn oynasiga qaytaramiz
-            TextConvert_Run(cmd == CMD_CONV_TODIGRAPH);
+        // Modal/menyu tekshiruvi ShowConvertMenu ichida (hook buni odatda o'zi
+        // tekshiradi; bu — oraliqda holat o'zgargan holat uchun).
+        ShowConvertMenu(hWnd, (int)(LONG)wp, (int)(LONG)lp);
+        return 0;
+
+    case WM_HOTKEY:
+        // Tezkor tugmalar (hotkeys.cpp). Sozlamalar ochiq paytda ular ro'yxatdan
+        // chiqarilgan bo'ladi, shuning uchun bu yerga kelmaydi.
+        switch (wp) {
+        case HKID_MODE:    ToggleMode();                 break;
+        case HKID_ENABLE:  ToggleEnabled();              break;
+        case HKID_CONVERT: ShowConvertMenuAtCaret(hWnd); break;
         }
         return 0;
-    }
 
     case WM_DESTROY:
+        Hotkeys_Unregister();
         KillTimer(hWnd, TRAY_RETRY_TIMER);
         Shell_NotifyIconW(NIM_DELETE, &g_nid);
         PostQuitMessage(0);
@@ -271,6 +347,12 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
 int WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR, int)
 {
     g_hInst = hInst;
+
+    // Sozlamalar oynasi tablari va hotkey control'i uchun (comctl32)
+    INITCOMMONCONTROLSEX icc = { sizeof(icc),
+                                 ICC_TAB_CLASSES | ICC_HOTKEY_CLASS | ICC_STANDARD_CLASSES };
+    InitCommonControlsEx(&icc);
+
     Settings_Load();
 
     // Ikki nusxa ishlab ketmasligi uchun
@@ -319,12 +401,16 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR, int)
         return 1;
     }
 
+    // Tezkor tugmalar. Band bo'lsa jim — foydalanuvchi Sozlamalarda ogohlantiriladi.
+    Hotkeys_Apply();
+
     // Birinchi ishga tushish: til so'raladi + qo'llanma ko'rsatiladi
     if (g_settings.firstRun) {
         ShowLanguageDialog(g_hWnd);
         UpdateTrayTip();
         ShowLicense(g_hWnd);        // litsenziya/ogohlantirish (tanlangan tilda)
         ShowTutorial(g_hWnd);
+        UpdateTrayTip();            // tanishtiruvda rejim tanlangan bo'lishi mumkin
         Shortcut_CreateDesktop();   // ish stolida yorliq
         g_settings.firstRun = false;
         Settings_Save();

@@ -1,5 +1,5 @@
 #pragma once
-// Avto rejim holat mashinasi (sof mantiq — Win32 ga bog'liq emas, alohida
+// Avto rejim holat mashinasi (sof mantiq — Win32 chaqiruvlari yo'q, alohida
 // test qilinadi). Hook har yozilgan belgini beradi, mashina nima qilishni
 // aytadi: hech narsa / oldingi belgini almashtirish / oxirgi almashtirishni
 // bekor qilish (undo).
@@ -33,8 +33,9 @@ void Auto_Reset(AutoState& s);
 bool Auto_IsApostrophe(wchar_t c);
 
 // Belgili tugma yozildi. ch — yozilgan belgi (harf registri bilan, apostrof);
-// boshqa yoki noma'lum belgi uchun 0.
-AutoAction Auto_OnChar(AutoState& s, wchar_t ch);
+// boshqa yoki noma'lum belgi uchun 0. rules — yoqilgan qoidalar
+// (AUTO_RULE_* bitlari, settings.h): o'chiq qoida juftligi almashmaydi.
+AutoAction Auto_OnChar(AutoState& s, wchar_t ch, unsigned rules);
 
 // Backspace bosildi: almashtirishdan darhol keyin bo'lsa — undo, aks holda
 // holat tozalanadi va Backspace o'z yo'liga o'tadi.

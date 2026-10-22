@@ -285,6 +285,17 @@ static DWORD WINAPI ConvThread(LPVOID param)
 {
     bool toDigraph = (param != NULL);
 
+    // Menyu tezkor tugma (Ctrl+Shift+F11 kabi) bilan ochilgan bo'lsa, foydalanuvchi
+    // Shift/Alt/Win ni hali qo'yib yubormagan bo'lishi mumkin — shunda bizning
+    // Ctrl+C ilovaga Ctrl+Shift+C (Chrome'da DevTools) bo'lib boradi. Qo'yib
+    // yuborilishini kutamiz, lekin 1 s dan ortiq emas.
+    for (int i = 0; i < 100; ++i) {
+        if (!(GetAsyncKeyState(VK_SHIFT) & 0x8000) && !(GetAsyncKeyState(VK_MENU) & 0x8000) &&
+            !(GetAsyncKeyState(VK_LWIN) & 0x8000)  && !(GetAsyncKeyState(VK_RWIN) & 0x8000))
+            break;
+        Sleep(10);
+    }
+
     Sleep(40);   // target oyna fokusni olib bo'lsin
 
     ClipSnapshot saved;
