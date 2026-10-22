@@ -1,4 +1,7 @@
 #pragma once
+// Tashqi havolalar (ui_about.cpp va ui_license.cpp ishlatadi)
+#define URL_GITHUB      L"https://github.com/HusanboyUmarov/Harfbek"
+
 // Dastur ikonkasi
 #define IDI_APPICON     101
 
@@ -15,10 +18,11 @@
 #define IDC_SET_LANG      212   // til combobox
 #define IDC_SET_TRIG_LBL  213
 #define IDC_SET_TRIG      214   // trigger combobox
-#define IDC_SET_CURRENT   216   // joriy trigger matni
 #define IDC_SET_STARTUP   217   // Windows bilan ishga tushish (checkbox)
 #define IDC_SET_APO_LBL   218
 #define IDC_SET_APO       219   // apostrof combobox
+#define IDC_SET_MODE_LBL  220
+#define IDC_SET_MODE      221   // rejim combobox (trigger / avto)
 
 // Dastur haqida dialogi
 #define IDD_ABOUT         230

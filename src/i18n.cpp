@@ -5,9 +5,10 @@
 static const wchar_t* STR[S_STR_COUNT][LANG_COUNT] = {
     // --- umumiy ---
     /*S_APP_TITLE*/       { L"Harfbek", L"Harfbek", L"Harfbek" },
-    /*S_TOOLTIP*/         { L"Harfbek — AltGr bilan özbek harflari",
-                            L"Harfbek — узбекские буквы через AltGr",
-                            L"Harfbek — Uzbek letters via AltGr" },
+    // Har tilda aynan bitta %s bor: u trigger keycap nomi bilan to'ldiriladi (wsprintfW).
+    /*S_TOOLTIP*/         { L"Harfbek — %s bilan özbek harflari",
+                            L"Harfbek — узбекские буквы через %s",
+                            L"Harfbek — Uzbek letters via %s" },
     /*S_ERROR*/           { L"Xato", L"Ошибка", L"Error" },
     /*S_ALREADY_RUNNING*/ { L"Dastur allaqaçon işlab turibdi.",
                             L"Программа уже запущена.",
@@ -39,7 +40,7 @@ static const wchar_t* STR[S_STR_COUNT][LANG_COUNT] = {
     /*S_ABOUT_TITLE*/     { L"Dastur haqida", L"О программе", L"About" },
     /*S_ABOUT_DESC*/      { L"Harfbek — özbek maxsus harflarini (ö ğ ş ç) "
                             L"trigger tugma bilan oson yozish uçun kiçik dastur. "
-                            L"Belgilangan matnni o' g' sh ch ↔ ö ğ ş ç ga o'giradi.",
+                            L"Belgilangan matnni o' g' sh ch ↔ ö ğ ş ç ga ögiradi.",
                             L"Harfbek — небольшая программа для удобного ввода "
                             L"особых узбекских букв (ö ğ ş ç) через клавишу-триггер. "
                             L"Преобразует выделенный текст o' g' sh ch ↔ ö ğ ş ç.",
@@ -57,10 +58,10 @@ static const wchar_t* STR[S_STR_COUNT][LANG_COUNT] = {
     /*S_LIC_TITLE*/       { L"Litsenziya", L"Лицензия", L"License" },
     /*S_LIC_BODY*/        { L"Harfbek — erkin va oçiq dastur, MIT litsenziyasi ostida tarqatiladi.\r\n\r\n"
                             L"Dastur \"borligiça\" (AS IS), heç qanday kafolatsiz beriladi. Undan foydalaniş natijasida yuzaga kelgan har qanday zarar uçun muallif javobgar emas.\r\n\r\n"
-                            L"O'zgartirilgan yoki boşqa manbadan olingan versiyalar muallifga aloqador emas.\r\n\r\n"
+                            L"Özgartirilgan yoki boşqa manbadan olingan versiyalar muallifga aloqador emas.\r\n\r\n"
                             L"© 2026 Husanboy Umarov (ascoder)\r\n"
                             L"Rasmiy manba: github.com/HusanboyUmarov/Harfbek\r\n"
-                            L"To'liq matn: LICENSE fayli.",
+                            L"Töliq matn: LICENSE fayli.",
                             L"Harfbek — свободная программа с открытым кодом, распространяется по лицензии MIT.\r\n\r\n"
                             L"Программа предоставляется «как есть» (AS IS), без каких-либо гарантий. Автор не несёт ответственности за любой ущерб, возникший в результате её использования.\r\n\r\n"
                             L"Изменённые или сторонние сборки не связаны с автором.\r\n\r\n"
@@ -116,7 +117,6 @@ static const wchar_t* STR[S_STR_COUNT][LANG_COUNT] = {
                               L"Run at Windows startup" },
     /*S_SET_SAVE*/          { L"Saqlaş", L"Сохранить", L"Save" },
     /*S_SET_CANCEL*/        { L"Bekor qiliş", L"Отмена", L"Cancel" },
-    /*S_SET_CURRENT*/       { L"Joriy:", L"Текущая:", L"Current:" },
     /*S_SET_APOSTROPHE*/    { L"Apostrof (o' g'):", L"Апостроф (o' g'):", L"Apostrophe (o' g'):" },
 
     // --- trigger nomlari (faqat sinalgan tugmalar) ---
@@ -153,6 +153,22 @@ static const wchar_t* STR[S_STR_COUNT][LANG_COUNT] = {
                             L"  •  desktop shortcut\r\n\r\n"
                             L"The harfbek.exe file will remain - to reinstall, just run it again.\r\n\r\n"
                             L"Continue?" },
+
+    // --- avto rejim ---
+    /*S_MENU_AUTOMODE*/   { L"Avto rejim (o' g' sh ch → ö ğ ş ç)",
+                            L"Авторежим (o' g' sh ch → ö ğ ş ç)",
+                            L"Auto mode (o' g' sh ch → ö ğ ş ç)" },
+    // S_TOOLTIP_AUTO da %s YO'Q (tooltip formatlanmaydi).
+    /*S_TOOLTIP_AUTO*/    { L"Harfbek — avto rejim: o' g' sh ch → ö ğ ş ç",
+                            L"Harfbek — авторежим: o' g' sh ch → ö ğ ş ç",
+                            L"Harfbek — auto mode: o' g' sh ch → ö ğ ş ç" },
+    /*S_SET_MODE*/        { L"Rejim:", L"Режим:", L"Mode:" },
+    /*S_MODE_TRIGGER*/    { L"Trigger tugma + harf",
+                            L"Клавиша-триггер + буква",
+                            L"Trigger key + letter" },
+    /*S_MODE_AUTO*/       { L"Avtomatik: o' g' sh ch → ö ğ ş ç",
+                            L"Автоматически: o' g' sh ch → ö ğ ş ç",
+                            L"Automatic: o' g' sh ch → ö ğ ş ç" },
 };
 
 const wchar_t* T(StrId id)

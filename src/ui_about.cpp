@@ -3,9 +3,8 @@
 #include <shellapi.h>
 
 static const wchar_t* kLinkedIn = L"https://www.linkedin.com/in/ascoder/";
-static const wchar_t* kGitHub   = L"https://github.com/HusanboyUmarov/Harfbek";
 
-static INT_PTR CALLBACK AboutProc(HWND h, UINT msg, WPARAM wp, LPARAM lp)
+static INT_PTR CALLBACK AboutProc(HWND h, UINT msg, WPARAM wp, LPARAM /*lp*/)
 {
     switch (msg)
     {
@@ -26,7 +25,7 @@ static INT_PTR CALLBACK AboutProc(HWND h, UINT msg, WPARAM wp, LPARAM lp)
             ShellExecuteW(h, L"open", kLinkedIn, NULL, NULL, SW_SHOWNORMAL);
             return TRUE;
         case IDC_ABOUT_GITHUB:
-            ShellExecuteW(h, L"open", kGitHub, NULL, NULL, SW_SHOWNORMAL);
+            ShellExecuteW(h, L"open", URL_GITHUB, NULL, NULL, SW_SHOWNORMAL);
             return TRUE;
         case IDC_ABOUT_LICENSE:
             ShowLicense(h);

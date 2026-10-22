@@ -1,7 +1,7 @@
 // Til tanlash dialogi (birinchi ishga tushishda ko'rsatiladi)
 #include "app.h"
 
-static INT_PTR CALLBACK LangProc(HWND h, UINT msg, WPARAM wp, LPARAM lp)
+static INT_PTR CALLBACK LangProc(HWND h, UINT msg, WPARAM wp, LPARAM /*lp*/)
 {
     switch (msg)
     {

@@ -1,15 +1,24 @@
 // Qo'llanma oynasi: 4 qadamli, klaviatura tugmalari rasm (GDI) ko'rinishida
 // chiziladi. Keyingi / Orqaga tugmalari va qadam ko'rsatkichi bor.
+// Barcha piksel o'lchamlari 96 DPI uchun yozilgan va S() orqali system DPI
+// ga masshtablanadi (manifestda dpiAware=true).
 #include "app.h"
-#include <windowsx.h>
 
 #define ID_BACK  1001
 #define ID_NEXT  1002
 #define STEP_COUNT 4
 
 // Oyna ichki o'lchami (px, 96 DPI)
-static const int CW = 480;
-static const int CH = 392;
+static const int CW96 = 480;
+static const int CH96 = 392;
+
+// System DPI va unga masshtablangan oyna ichki o'lchami (ShowTutorial to'ldiradi)
+static int s_dpi = 96;
+static int s_cw  = CW96;
+static int s_ch  = CH96;
+
+// 96 DPI dagi pikselni joriy DPI ga o'tkazadi
+static int S(int x) { return MulDiv(x, s_dpi, 96); }
 
 // Ranglar
 static const COLORREF C_BG      = RGB(248, 249, 251);
@@ -39,16 +48,16 @@ static void DrawKeyCap(HDC dc, int cx, int cy, int w, int h,
     HGDIOBJ oldPen = SelectObject(dc, GetStockObject(NULL_PEN));
     HBRUSH  shb    = CreateSolidBrush(C_SHADOW);
     HGDIOBJ oldBr  = SelectObject(dc, shb);
-    RoundRect(dc, r.left, r.top + 3, r.right, r.bottom + 3, 9, 9);
+    RoundRect(dc, r.left, r.top + S(3), r.right, r.bottom + S(3), S(9), S(9));
     SelectObject(dc, oldBr);
     DeleteObject(shb);
 
     // yuza
-    HPEN   pen = CreatePen(PS_SOLID, 1, accent ? C_ACCENT : C_CAPBRD);
+    HPEN   pen = CreatePen(PS_SOLID, S(1), accent ? C_ACCENT : C_CAPBRD);
     HBRUSH br  = CreateSolidBrush(accent ? C_ACC_BG : RGB(255,255,255));
     SelectObject(dc, pen);
     SelectObject(dc, br);
-    RoundRect(dc, r.left, r.top, r.right, r.bottom, 9, 9);
+    RoundRect(dc, r.left, r.top, r.right, r.bottom, S(9), S(9));
     SelectObject(dc, oldPen);
     DeleteObject(pen);
     DeleteObject(br);
@@ -72,17 +81,17 @@ static int MeasW(HDC dc, const wchar_t* t, HFONT f)
     return s.cx;
 }
 
-// tugmalar ketma-ketligini markazga chizadi
+// tugmalar ketma-ketligini markazga chizadi (cy, capH — allaqachon masshtablangan)
 static void DrawSeq(HDC dc, int cy, int capH, const SeqItem* it, int n,
                     HFONT fKey, HFONT fSym)
 {
     int w[16], total = 0;
-    const int gap = 7;
-    const int minCap = (capH > 38) ? 46 : 32;
-    const int padCap = (capH > 38) ? 24 : 16;
+    const int gap = S(7);
+    const int minCap = (capH > S(38)) ? S(46) : S(32);
+    const int padCap = (capH > S(38)) ? S(24) : S(16);
     for (int i = 0; i < n; ++i) {
         if (it[i].kind == 2) {
-            w[i] = MeasW(dc, it[i].t, fSym) + 10;
+            w[i] = MeasW(dc, it[i].t, fSym) + S(10);
         } else {
             w[i] = MeasW(dc, it[i].t, fKey) + padCap;
             if (w[i] < minCap) w[i] = minCap;
@@ -90,7 +99,7 @@ static void DrawSeq(HDC dc, int cy, int capH, const SeqItem* it, int n,
         total += w[i];
         if (i) total += gap;
     }
-    int x = (CW - total) / 2;
+    int x = (s_cw - total) / 2;
     for (int i = 0; i < n; ++i) {
         if (it[i].kind == 2) {
             SetBkMode(dc, TRANSPARENT);
@@ -113,25 +122,26 @@ static void DrawLetterTable(HDC dc, const wchar_t* trig, TutState* st)
     struct { const wchar_t* key; const wchar_t* res; } rows[] = {
         { L"o", L"ö" }, { L"g", L"ğ" }, { L"s", L"ş" }, { L"c", L"ç" },
     };
-    int y = 96;
+    int y = S(96);
     for (int i = 0; i < 4; ++i) {
         SeqItem seq[] = {
             { trig,        0 }, { L"+", 2 },
             { rows[i].key, 0 }, { L"→", 2 }, { rows[i].res, 1 },
         };
-        DrawSeq(dc, y, 30, seq, 5, st->fKeySm, st->fSymSm);
-        y += 34;
+        DrawSeq(dc, y, S(30), seq, 5, st->fKeySm, st->fSymSm);
+        y += S(34);
     }
 }
 
 // tray ikonka + o'ng-tugma menyusi (Qadam 4)
 static void DrawTrayHint(HDC dc, TutState* st)
 {
-    int iconY = 118;
+    int iconY = S(118);
+    int iconSz = S(48);
     HICON ic = (HICON)LoadImageW(g_hInst, MAKEINTRESOURCEW(IDI_APPICON),
-                                 IMAGE_ICON, 48, 48, LR_DEFAULTCOLOR);
+                                 IMAGE_ICON, iconSz, iconSz, LR_DEFAULTCOLOR);
     if (ic) {
-        DrawIconEx(dc, 96, iconY, ic, 48, 48, 0, NULL, DI_NORMAL);
+        DrawIconEx(dc, S(96), iconY, ic, iconSz, iconSz, 0, NULL, DI_NORMAL);
         DestroyIcon(ic);
     }
 
@@ -139,26 +149,26 @@ static void DrawTrayHint(HDC dc, TutState* st)
     SetBkMode(dc, TRANSPARENT);
     SetTextColor(dc, RGB(128, 134, 146));
     HGDIOBJ o = SelectObject(dc, st->fSym);
-    RECT ar = { 150, iconY, 190, iconY + 48 };
+    RECT ar = { S(150), iconY, S(190), iconY + iconSz };
     DrawTextW(dc, L"→", -1, &ar, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
     SelectObject(dc, o);
 
     // menyu qutisi
-    RECT m = { 202, 92, 384, 188 };
+    RECT m = { S(202), S(92), S(384), S(188) };
     HGDIOBJ op = SelectObject(dc, GetStockObject(NULL_PEN));
     HBRUSH shb = CreateSolidBrush(C_SHADOW);
     HGDIOBJ ob = SelectObject(dc, shb);
-    RoundRect(dc, m.left, m.top + 3, m.right, m.bottom + 3, 8, 8);
+    RoundRect(dc, m.left, m.top + S(3), m.right, m.bottom + S(3), S(8), S(8));
     SelectObject(dc, ob); DeleteObject(shb);
 
-    HPEN   pen = CreatePen(PS_SOLID, 1, C_CAPBRD);
+    HPEN   pen = CreatePen(PS_SOLID, S(1), C_CAPBRD);
     HBRUSH br  = CreateSolidBrush(RGB(255, 255, 255));
     SelectObject(dc, pen); SelectObject(dc, br);
-    RoundRect(dc, m.left, m.top, m.right, m.bottom, 8, 8);
+    RoundRect(dc, m.left, m.top, m.right, m.bottom, S(8), S(8));
     SelectObject(dc, op); DeleteObject(pen); DeleteObject(br);
 
     // birinchi qator — "Sozlamalar" ajratib ko'rsatiladi
-    RECT hl = { m.left + 4, m.top + 6, m.right - 4, m.top + 28 };
+    RECT hl = { m.left + S(4), m.top + S(6), m.right - S(4), m.top + S(28) };
     HBRUSH hb = CreateSolidBrush(C_ACC_BG);
     FillRect(dc, &hl, hb);
     DeleteObject(hb);
@@ -166,17 +176,18 @@ static void DrawTrayHint(HDC dc, TutState* st)
     const wchar_t* items[] = { T(S_MENU_SETTINGS), T(S_MENU_LANGUAGE), T(S_MENU_TUTORIAL) };
     HGDIOBJ of = SelectObject(dc, st->fBody);
     for (int i = 0; i < 3; ++i) {
-        RECT ir = { m.left + 12, m.top + 6 + i*24, m.right - 8, m.top + 28 + i*24 };
+        RECT ir = { m.left + S(12), m.top + S(6) + i*S(24),
+                    m.right - S(8), m.top + S(28) + i*S(24) };
         SetTextColor(dc, i == 0 ? C_ACC_TXT : C_BODY);
         DrawTextW(dc, items[i], -1, &ir, DT_LEFT | DT_VCENTER | DT_SINGLELINE);
     }
     SelectObject(dc, of);
 }
 
-static void PaintTutorial(HWND hwnd, HDC dc, TutState* st)
+static void PaintTutorial(HDC dc, TutState* st)
 {
     // fon
-    RECT full = { 0, 0, CW, CH };
+    RECT full = { 0, 0, s_cw, s_ch };
     HBRUSH bg = CreateSolidBrush(C_BG);
     FillRect(dc, &full, bg);
     DeleteObject(bg);
@@ -189,7 +200,7 @@ static void PaintTutorial(HWND hwnd, HDC dc, TutState* st)
 
     HGDIOBJ of = SelectObject(dc, st->fTitle);
     SetTextColor(dc, C_TITLE);
-    RECT tr = { 24, 22, CW - 24, 58 };
+    RECT tr = { S(24), S(22), s_cw - S(24), S(58) };
     DrawTextW(dc, T(titleId[st->step]), -1, &tr, DT_CENTER | DT_SINGLELINE | DT_VCENTER);
     SelectObject(dc, of);
 
@@ -198,7 +209,7 @@ static void PaintTutorial(HWND hwnd, HDC dc, TutState* st)
     wsprintfW(sc, T(S_TUT_STEP), st->step + 1, STEP_COUNT);
     of = SelectObject(dc, st->fStep);
     SetTextColor(dc, C_STEPTXT);
-    RECT srr = { CW - 120, 20, CW - 20, 34 };
+    RECT srr = { s_cw - S(120), S(20), s_cw - S(20), S(34) };
     DrawTextW(dc, sc, -1, &srr, DT_RIGHT | DT_SINGLELINE | DT_VCENTER);
     SelectObject(dc, of);
 
@@ -208,11 +219,13 @@ static void PaintTutorial(HWND hwnd, HDC dc, TutState* st)
 
     if (st->step == 0) {
         SeqItem seq[] = { { trig,0 }, { L"+",2 }, { L"O",0 }, { L"→",2 }, { L"ö",1 } };
-        DrawSeq(dc, 138, 50, seq, 5, st->fKey, st->fSym);
+        DrawSeq(dc, S(138), S(50), seq, 5, st->fKey, st->fSym);
     } else if (st->step == 1) {
-        SeqItem seq[] = { { L"Shift",0 }, { L"+",2 }, { trig,0 }, { L"+",2 },
+        // trigger o'ng Shift bo'lsa birinchi tugma chap Shift ekani ko'rinsin
+        const wchar_t* shiftCap = g_settings.triggerVk == VK_RSHIFT ? L"L Shift" : L"Shift";
+        SeqItem seq[] = { { shiftCap,0 }, { L"+",2 }, { trig,0 }, { L"+",2 },
                           { L"O",0 }, { L"→",2 }, { L"Ö",1 } };
-        DrawSeq(dc, 138, 50, seq, 7, st->fKey, st->fSym);
+        DrawSeq(dc, S(138), S(50), seq, 7, st->fKey, st->fSym);
     } else if (st->step == 2) {
         DrawLetterTable(dc, trig, st);
     } else {
@@ -222,19 +235,19 @@ static void PaintTutorial(HWND hwnd, HDC dc, TutState* st)
     // tavsif matni
     of = SelectObject(dc, st->fBody);
     SetTextColor(dc, C_BODY);
-    RECT br = { 34, 240, CW - 34, 300 };
+    RECT br = { S(34), S(240), s_cw - S(34), S(300) };
     DrawTextW(dc, T(bodyId[st->step]), -1, &br,
               DT_CENTER | DT_WORDBREAK | DT_NOPREFIX);
     SelectObject(dc, of);
 
     // qadam nuqtalari
-    int dotY = 316, r = 5, span = STEP_COUNT * 18 - 6;
-    int x0 = (CW - span) / 2;
+    int dotY = S(316), r = S(5), pitch = S(18), span = STEP_COUNT * pitch - S(6);
+    int x0 = (s_cw - span) / 2;
     HGDIOBJ op = SelectObject(dc, GetStockObject(NULL_PEN));
     for (int i = 0; i < STEP_COUNT; ++i) {
         HBRUSH d = CreateSolidBrush(i == st->step ? C_ACCENT : C_DOT_OFF);
         HGDIOBJ ob = SelectObject(dc, d);
-        int cx = x0 + i * 18;
+        int cx = x0 + i * pitch;
         Ellipse(dc, cx, dotY - r, cx + 2*r, dotY + r);
         SelectObject(dc, ob);
         DeleteObject(d);
@@ -251,6 +264,19 @@ static void UpdateButtons(HWND hwnd, TutState* st)
     EnableWindow(GetDlgItem(hwnd, ID_BACK), st->step > 0);
 }
 
+// bir qadam oldinga/orqaga; oxirgi qadamda "Keyingi" oynani yopadi
+static void GoStep(HWND hwnd, TutState* st, int delta)
+{
+    int ns = st->step + delta;
+    if (ns >= STEP_COUNT) { DestroyWindow(hwnd); return; }
+    if (ns < 0) return;
+    st->step = ns;
+    UpdateButtons(hwnd, st);
+    // "Orqaga" o'chib qolsa fokus yo'qolmasin (Enter/Esc ishlashda qolsin)
+    if (ns == 0) SetFocus(GetDlgItem(hwnd, ID_NEXT));
+    InvalidateRect(hwnd, NULL, TRUE);
+}
+
 static LRESULT CALLBACK TutProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 {
     TutState* st = (TutState*)GetWindowLongPtrW(hwnd, GWLP_USERDATA);
@@ -261,27 +287,28 @@ static LRESULT CALLBACK TutProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
     {
         st = new TutState();
         st->step = 0;
-        st->fTitle = CreateFontW(-24,0,0,0,700,0,0,0,DEFAULT_CHARSET,0,0,
+        st->fTitle = CreateFontW(-S(24),0,0,0,700,0,0,0,DEFAULT_CHARSET,0,0,
                                  CLEARTYPE_QUALITY,0,L"Segoe UI");
-        st->fBody  = CreateFontW(-15,0,0,0,400,0,0,0,DEFAULT_CHARSET,0,0,
+        st->fBody  = CreateFontW(-S(15),0,0,0,400,0,0,0,DEFAULT_CHARSET,0,0,
                                  CLEARTYPE_QUALITY,0,L"Segoe UI");
-        st->fKey   = CreateFontW(-20,0,0,0,600,0,0,0,DEFAULT_CHARSET,0,0,
+        st->fKey   = CreateFontW(-S(20),0,0,0,600,0,0,0,DEFAULT_CHARSET,0,0,
                                  CLEARTYPE_QUALITY,0,L"Segoe UI");
-        st->fKeySm = CreateFontW(-15,0,0,0,600,0,0,0,DEFAULT_CHARSET,0,0,
+        st->fKeySm = CreateFontW(-S(15),0,0,0,600,0,0,0,DEFAULT_CHARSET,0,0,
                                  CLEARTYPE_QUALITY,0,L"Segoe UI");
-        st->fSym   = CreateFontW(-22,0,0,0,400,0,0,0,DEFAULT_CHARSET,0,0,
+        st->fSym   = CreateFontW(-S(22),0,0,0,400,0,0,0,DEFAULT_CHARSET,0,0,
                                  CLEARTYPE_QUALITY,0,L"Segoe UI");
-        st->fSymSm = CreateFontW(-16,0,0,0,400,0,0,0,DEFAULT_CHARSET,0,0,
+        st->fSymSm = CreateFontW(-S(16),0,0,0,400,0,0,0,DEFAULT_CHARSET,0,0,
                                  CLEARTYPE_QUALITY,0,L"Segoe UI");
-        st->fStep  = CreateFontW(-12,0,0,0,400,0,0,0,DEFAULT_CHARSET,0,0,
+        st->fStep  = CreateFontW(-S(12),0,0,0,400,0,0,0,DEFAULT_CHARSET,0,0,
                                  CLEARTYPE_QUALITY,0,L"Segoe UI");
         SetWindowLongPtrW(hwnd, GWLP_USERDATA, (LONG_PTR)st);
 
-        int by = CH - 32 - 18;
+        int bh = S(32);
+        int by = s_ch - bh - S(18);
         HWND b = CreateWindowW(L"BUTTON", L"", WS_CHILD|WS_VISIBLE|WS_TABSTOP,
-                     24, by, 120, 32, hwnd, (HMENU)ID_BACK, g_hInst, NULL);
+                     S(24), by, S(120), bh, hwnd, (HMENU)ID_BACK, g_hInst, NULL);
         HWND nx = CreateWindowW(L"BUTTON", L"", WS_CHILD|WS_VISIBLE|WS_TABSTOP|BS_DEFPUSHBUTTON,
-                     CW - 24 - 140, by, 140, 32, hwnd, (HMENU)ID_NEXT, g_hInst, NULL);
+                     s_cw - S(24) - S(140), by, S(140), bh, hwnd, (HMENU)ID_NEXT, g_hInst, NULL);
         SendMessageW(b,  WM_SETFONT, (WPARAM)st->fBody, TRUE);
         SendMessageW(nx, WM_SETFONT, (WPARAM)st->fBody, TRUE);
         UpdateButtons(hwnd, st);
@@ -289,13 +316,12 @@ static LRESULT CALLBACK TutProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
     }
 
     case WM_COMMAND:
-        if (LOWORD(wp) == ID_BACK) {
-            if (st->step > 0) { st->step--; UpdateButtons(hwnd, st);
-                                InvalidateRect(hwnd, NULL, TRUE); }
-        } else if (LOWORD(wp) == ID_NEXT) {
-            if (st->step < STEP_COUNT - 1) { st->step++; UpdateButtons(hwnd, st);
-                                             InvalidateRect(hwnd, NULL, TRUE); }
-            else DestroyWindow(hwnd);
+        switch (LOWORD(wp))
+        {
+        case ID_BACK:   GoStep(hwnd, st, -1); break;
+        case ID_NEXT:
+        case IDOK:      GoStep(hwnd, st, +1); break;   // Enter = "Keyingi"
+        case IDCANCEL:  DestroyWindow(hwnd);  break;   // Esc = yopish
         }
         return 0;
 
@@ -308,10 +334,10 @@ static LRESULT CALLBACK TutProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
         HDC dc = BeginPaint(hwnd, &ps);
         // ikki bosqichli (off-screen) chizish — silliq ko'rinish uchun
         HDC   mem = CreateCompatibleDC(dc);
-        HBITMAP bmp = CreateCompatibleBitmap(dc, CW, CH);
+        HBITMAP bmp = CreateCompatibleBitmap(dc, s_cw, s_ch);
         HGDIOBJ ob = SelectObject(mem, bmp);
-        PaintTutorial(hwnd, mem, st);
-        BitBlt(dc, 0, 0, CW, CH, mem, 0, 0, SRCCOPY);
+        PaintTutorial(mem, st);
+        BitBlt(dc, 0, 0, s_cw, s_ch, mem, 0, 0, SRCCOPY);
         SelectObject(mem, ob);
         DeleteObject(bmp);
         DeleteDC(mem);
@@ -347,9 +373,17 @@ void ShowTutorial(HWND parent)
         registered = true;
     }
 
+    // system DPI (manifestda dpiAware=true bo'lgani uchun haqiqiy qiymat qaytadi)
+    HDC sdc = GetDC(NULL);
+    s_dpi = sdc ? GetDeviceCaps(sdc, LOGPIXELSY) : 96;
+    if (sdc) ReleaseDC(NULL, sdc);
+    if (s_dpi <= 0) s_dpi = 96;
+    s_cw = S(CW96);
+    s_ch = S(CH96);
+
     DWORD style   = WS_CAPTION | WS_SYSMENU;
     DWORD exstyle = WS_EX_DLGMODALFRAME | WS_EX_CONTROLPARENT;
-    RECT rc = { 0, 0, CW, CH };
+    RECT rc = { 0, 0, s_cw, s_ch };
     AdjustWindowRectEx(&rc, style, FALSE, exstyle);
     int ww = rc.right - rc.left, wh = rc.bottom - rc.top;
     int sx = (GetSystemMetrics(SM_CXSCREEN) - ww) / 2;
@@ -365,6 +399,7 @@ void ShowTutorial(HWND parent)
     ShowWindow(hwnd, SW_SHOW);
     UpdateWindow(hwnd);
     SetForegroundWindow(hwnd);
+    SetFocus(GetDlgItem(hwnd, ID_NEXT));   // Enter darhol "Keyingi" ni bossin
 
     MSG msg;
     while (IsWindow(hwnd) && GetMessageW(&msg, NULL, 0, 0) > 0) {

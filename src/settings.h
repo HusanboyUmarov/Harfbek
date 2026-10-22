@@ -4,6 +4,13 @@
 // Qo'llab-quvvatlanadigan tillar
 enum Lang { LANG_UZ = 0, LANG_RU = 1, LANG_EN = 2, LANG_COUNT = 3 };
 
+// Yozish rejimi: ikkalasidan biri ishlaydi
+enum InputMode {
+    MODE_TRIGGER = 0,   // trigger tugma + harf (AltGr+o -> ö)
+    MODE_AUTO    = 1,   // eski yozuv avtomatik almashadi (o' g' sh ch -> ö ğ ş ç)
+    MODE_COUNT   = 2
+};
+
 // Dastur sozlamalari (%APPDATA%\Harfbek\settings.ini da saqlanadi)
 struct Settings {
     Lang lang;          // interfeys tili
@@ -12,6 +19,7 @@ struct Settings {
     bool runAtStartup;  // Windows bilan birga ishga tushsinmi
     bool enabled;       // almashtirish yoqilganmi
     wchar_t apo;        // o'girishda o'g' /o'g' uchun apostrof belgisi (', `, ʻ ...)
+    InputMode mode;     // yozish rejimi (trigger yoki avto)
 };
 
 extern Settings g_settings;
@@ -22,6 +30,9 @@ void Settings_Save();   // sozlamalarni faylga yozadi
 // Windows bilan ishga tushish (HKCU\...\Run)
 bool Startup_IsEnabled();
 void Startup_Set(bool enable);
+// Ishga tushganda chaqiriladi: g_settings.runAtStartup ni registrdagi haqiqiy
+// holatga moslaydi; yoqilgan bo'lsa Run yo'lini joriy exe bilan yangilaydi.
+void Startup_Sync();
 
 // Ish stolida "Harfbek.lnk" yorlig'ini yaratadi (bo'lsa - tegmaydi)
 void Shortcut_CreateDesktop();

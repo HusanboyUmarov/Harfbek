@@ -3,9 +3,7 @@
 #include "app.h"
 #include <shellapi.h>
 
-static const wchar_t* kGitHub = L"https://github.com/HusanboyUmarov/Harfbek";
-
-static INT_PTR CALLBACK LicenseProc(HWND h, UINT msg, WPARAM wp, LPARAM lp)
+static INT_PTR CALLBACK LicenseProc(HWND h, UINT msg, WPARAM wp, LPARAM /*lp*/)
 {
     switch (msg)
     {
@@ -20,7 +18,7 @@ static INT_PTR CALLBACK LicenseProc(HWND h, UINT msg, WPARAM wp, LPARAM lp)
         switch (LOWORD(wp))
         {
         case IDC_LIC_GITHUB:
-            ShellExecuteW(h, L"open", kGitHub, NULL, NULL, SW_SHOWNORMAL);
+            ShellExecuteW(h, L"open", URL_GITHUB, NULL, NULL, SW_SHOWNORMAL);
             return TRUE;
         case IDOK:
         case IDCANCEL:

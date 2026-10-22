@@ -16,6 +16,8 @@
 #define WM_APP_MODCHECK  (WM_APP + 3)
 // Stuck-key tekshiruv taymerlari: ID = MODCHECK_TIMER_BASE + vk
 #define MODCHECK_TIMER_BASE  0x500
+// Tray ikonkani qayta qo'shishga urinish taymeri (tray hali tayyor bo'lmasa)
+#define TRAY_RETRY_TIMER     0x400
 // Ctrl+o'ng-tugma bosilganda o'girish menyusini ko'rsatish (wp=x, lp=y)
 #define WM_APP_CONVERTMENU  (WM_APP + 4)
 
@@ -28,6 +30,7 @@ enum {
     CMD_STARTUP,
     CMD_UNINSTALL,
     CMD_EXIT,
+    CMD_AUTOMODE,               // avto rejim (MODE_TRIGGER <-> MODE_AUTO)
     CMD_LANG_UZ = 200,
     CMD_LANG_RU,
     CMD_LANG_EN,
@@ -48,9 +51,9 @@ bool Trigger_IsModifier(UINT vk);   // Alt/Ctrl/Shift oilasimi (yutilmaydigan tr
 bool Trigger_IsAllowed(UINT vk);    // sinalgan trigger ro'yxatida bormi (ui_settings.cpp)
 void Hook_ResetTriggerState();      // trigger o'zgarganda kuzatuv holatini tozalaydi
 
-// Trigger tugma nomlari (ui_settings.cpp da aniqlanadi)
-const wchar_t* TriggerFullName(UINT vk);            // to'liq, joriy tilda: "O'ng Alt"
-void           TriggerKeyCap(UINT vk, wchar_t* out, int n);  // qisqa keycap: "AltGr"
+// Trigger tugmaning qisqa keycap nomi, masalan "AltGr" (ui_settings.cpp da aniqlanadi;
+// qo'llanma va tray tooltip uchun)
+void TriggerKeyCap(UINT vk, wchar_t* out, int n);
 
 // Matnni o'girish (convert.cpp): belgilangan matnni nusxalab, o'girib, qaytaradi.
 // toDigraph=true: ö ğ ş ç -> o' g' sh ch ;  false: teskari.

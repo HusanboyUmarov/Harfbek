@@ -1,8 +1,43 @@
 #include <windows.h>
+#include <winver.h>
 #include "src/resource.h"
 
 // Dastur ikonkasi. Eng kichik ID'li ICON resursi .exe ikonkasi bo'ladi.
 IDI_APPICON ICON "assets/icon.ico"
+
+// Manifest (Common Controls v6 + DPI): CREATEPROCESS_MANIFEST_RESOURCE_ID = 1, RT_MANIFEST = 24
+1 24 "app.manifest"
+
+// Versiya ma'lumoti (Explorer: Xossalar -> Tafsilotlar). Matnlar ASCII - rc
+// kodlashiga bog'liq bo'lmasligi uchun (MSVC rc va MinGW windres ikkalasida bir xil).
+VS_VERSION_INFO VERSIONINFO
+FILEVERSION     1,0,0,0
+PRODUCTVERSION  1,0,0,0
+FILEFLAGSMASK   VS_FFI_FILEFLAGSMASK
+FILEFLAGS       0
+FILEOS          VOS_NT_WINDOWS32
+FILETYPE        VFT_APP
+FILESUBTYPE     VFT2_UNKNOWN
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904B0"
+        BEGIN
+            VALUE "CompanyName",      "Husanboy Umarov (ascoder)"
+            VALUE "FileDescription",  "Harfbek - Uzbek special letters"
+            VALUE "FileVersion",      "1.0.0.0"
+            VALUE "InternalName",     "Harfbek"
+            VALUE "LegalCopyright",   "Copyright (C) 2026 Husanboy Umarov (ascoder)"
+            VALUE "OriginalFilename", "harfbek.exe"
+            VALUE "ProductName",      "Harfbek"
+            VALUE "ProductVersion",   "1.0.0.0"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x0409, 0x04B0
+    END
+END
 
 // Til tanlash dialogi (matnlar ish vaqtida qo'yiladi - shuning uchun bu yerda bo'sh)
 IDD_LANG DIALOGEX 0, 0, 200, 94
@@ -17,21 +52,22 @@ BEGIN
 END
 
 // Sozlamalar dialogi (matnlar ish vaqtida joriy tilda qo'yiladi)
-IDD_SETTINGS DIALOGEX 0, 0, 246, 156
+IDD_SETTINGS DIALOGEX 0, 0, 290, 166
 STYLE DS_CENTER | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Settings"
 FONT 9, "Segoe UI"
 BEGIN
     LTEXT      "", IDC_SET_LANG_LBL, 12, 14, 76, 10
-    COMBOBOX   IDC_SET_LANG, 92, 12, 142, 90, CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
-    LTEXT      "", IDC_SET_TRIG_LBL, 12, 38, 76, 10
-    COMBOBOX   IDC_SET_TRIG, 92, 36, 142, 140, CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
-    LTEXT      "", IDC_SET_CURRENT,  12, 58, 222, 10
-    LTEXT      "", IDC_SET_APO_LBL,  12, 76, 76, 10
-    COMBOBOX   IDC_SET_APO, 92, 74, 142, 100, CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
-    AUTOCHECKBOX "", IDC_SET_STARTUP, 12, 98, 222, 12
-    DEFPUSHBUTTON "", IDOK,          122, 130, 54, 16
-    PUSHBUTTON "", IDCANCEL,         180, 130, 54, 16
+    COMBOBOX   IDC_SET_LANG, 92, 12, 186, 90, CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    LTEXT      "", IDC_SET_MODE_LBL, 12, 38, 76, 10
+    COMBOBOX   IDC_SET_MODE, 92, 36, 186, 60, CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    LTEXT      "", IDC_SET_TRIG_LBL, 12, 62, 76, 10
+    COMBOBOX   IDC_SET_TRIG, 92, 60, 186, 140, CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    LTEXT      "", IDC_SET_APO_LBL,  12, 86, 76, 10
+    COMBOBOX   IDC_SET_APO, 92, 84, 186, 100, CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    AUTOCHECKBOX "", IDC_SET_STARTUP, 12, 108, 266, 12
+    DEFPUSHBUTTON "", IDOK,          166, 140, 54, 16
+    PUSHBUTTON "", IDCANCEL,         224, 140, 54, 16
 END
 
 // Dastur haqida dialogi

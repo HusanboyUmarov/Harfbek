@@ -33,7 +33,7 @@ enum StrId {
     // sozlamalar
     S_SET_TITLE, S_SET_LANGUAGE, S_SET_TRIGGER,
     S_SET_STARTUP, S_SET_SAVE, S_SET_CANCEL,
-    S_SET_CURRENT, S_SET_APOSTROPHE,
+    S_SET_APOSTROPHE,
 
     // trigger nomlari (faqat sinalgan tugmalar ro'yxati)
     S_TRIG_RALT, S_TRIG_LALT, S_TRIG_BOTHALT, S_TRIG_RCTRL, S_TRIG_RSHIFT,
@@ -41,6 +41,9 @@ enum StrId {
 
     // dasturni o'chirish (uninstall)
     S_MENU_UNINSTALL, S_UNINST_CONFIRM,
+
+    // avto rejim
+    S_MENU_AUTOMODE, S_TOOLTIP_AUTO, S_SET_MODE, S_MODE_TRIGGER, S_MODE_AUTO,
 
     S_STR_COUNT
 };

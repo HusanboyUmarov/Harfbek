@@ -39,7 +39,18 @@ shu yorliqdan ochasiz.
 
 - **Maxsus harflar** — trigger + harf → ö ğ ş ç (Shift yoki CapsLock bilan katta harf).
 - **Matnni o'girish** — matnni belgilab **Ctrl + sichqoncha o'ng tugmasi** bossangiz
-  menyu chiqadi: `ö ğ ş ç → o' g' sh ch` yoki teskarisi.
+  menyu chiqadi: `ö ğ ş ç → o' g' sh ch` yoki teskarisi. Konsol oynalarida (cmd,
+  PowerShell, Windows Terminal) Ctrl + o'ng tugma ushlanmaydi — terminalning o'z
+  xatti-harakati qoladi. Belgilangan asl matnning nusxasi (Ctrl+C) Win+V tarixiga
+  baribir tushadi; faqat o'girilgan vaqtinchalik matn tarixga tushmaydi va asl
+  clipboard dublikatsiz tiklanadi.
+- **Avto rejim** — o'zbek alifbosiga yangi harflar (ö ğ ş ç) kiritilgan: ular
+  `o'`, `g'`, `sh`, `ch` o'rniga ishlatiladi. Avto rejimda eski yozuvda yozasiz
+  (`o'` `g'` `sh` `ch`), dastur uni avtomatik ö ğ ş ç ga o'zgartiradi; katta harf
+  saqlanadi (`Sh` → **Ş**, `sh` → **ş**). O'zgarishdan keyin darhol Backspace
+  bossangiz, asl yozuv qaytadi (`ş` → `sh`) — inglizcha so'zlar uchun qulay.
+  Terminal oynalarida ishlamaydi. Tray menyudan yoki Sozlamalardan yoqiladi.
+  Trigger rejimi bilan bir vaqtda ishlamaydi — biri tanlanadi.
 - **Trigger tugmani tanlash** — 10 ta sinalgan variant: o'ng Alt (AltGr), chap Alt,
   ikkala Alt, o'ng Ctrl, o'ng Shift, CapsLock, Menyu tugmasi, Scroll Lock, Pause, F12.
 - **3 til interfeysi** — o'zbekcha, ruscha, inglizcha.
@@ -113,6 +124,8 @@ ochib: `build.bat`.
   kodlari izohlar bilan berilgan), keyin qayta quring.
 - **Ikonkani o'zgartirish:** `make_icon.ps1` ni tahrirlab ishga tushiring
   (`powershell -ExecutionPolicy Bypass -File make_icon.ps1`), keyin qayta quring.
+- **Manifest:** `app.manifest` (Common Controls v6, DPI) `app.rc` orqali exe ichiga
+  o'rnatiladi; alohida fayl sifatida tarqatish shart emas.
 
 ## 🔒 Rasmiy manba va fayl tekshiruvi
 

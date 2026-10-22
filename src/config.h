@@ -51,8 +51,15 @@ static const KeyMap kMaps[] = {
 
 static const int kMapCount = sizeof(kMaps) / sizeof(kMaps[0]);
 
-// TRIGGER tugmasi (standart). Foydalanuvchi buni Sozlamalardan o'zgartira oladi.
-//   - Faqat o'ng Alt (AltGr):  VK_RMENU   <- standart (til almashtirish bilan urishmaydi)
-//   - Faqat chap Alt:          VK_LMENU
-//   - Ikkala Alt ham:          VK_MENU
+// TRIGGER tugmasi (standart). Foydalanuvchi buni Sozlamalardan o'zgartira oladi,
+// lekin faqat sinalgan ro'yxatdan (ui_settings.cpp, kTrigOpts / Trigger_IsAllowed):
+//   - O'ng Alt (AltGr):  VK_RMENU   <- standart
+//   - Chap Alt:          VK_LMENU
+//   - Ikkala Alt ham:    VK_MENU
+//   - O'ng Ctrl:         VK_RCONTROL
+//   - O'ng Shift:        VK_RSHIFT
+//   - Caps Lock, Menyu (VK_APPS), Scroll Lock, Pause, F12 — bular hook
+//     tomonidan to'liq yutiladi (o'z vazifasini bajarmaydi).
+// Bu yerga faqat shu ro'yxatdagi tugmani yozing (boshqasi sinalmagan va
+// Sozlamalar oynasida ko'rinmaydi).
 #define TRIGGER_VK  VK_RMENU
