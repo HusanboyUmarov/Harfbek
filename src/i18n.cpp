@@ -5,9 +5,10 @@
 static const wchar_t* STR[S_STR_COUNT][LANG_COUNT] = {
     // --- umumiy ---
     /*S_APP_TITLE*/       { L"Harfbek", L"Harfbek", L"Harfbek" },
-    /*S_TOOLTIP*/         { L"Harfbek — AltGr bilan özbek harflari",
-                            L"Harfbek — узбекские буквы через AltGr",
-                            L"Harfbek — Uzbek letters via AltGr" },
+    // Har tilda aynan bitta %s bor: u trigger keycap nomi bilan to'ldiriladi (wsprintfW).
+    /*S_TOOLTIP*/         { L"Harfbek — %s bilan özbek harflari",
+                            L"Harfbek — узбекские буквы через %s",
+                            L"Harfbek — Uzbek letters via %s" },
     /*S_ERROR*/           { L"Xato", L"Ошибка", L"Error" },
     /*S_ALREADY_RUNNING*/ { L"Dastur allaqaçon işlab turibdi.",
                             L"Программа уже запущена.",
@@ -20,7 +21,7 @@ static const wchar_t* STR[S_STR_COUNT][LANG_COUNT] = {
     /*S_MENU_ENABLED*/    { L"Yoqilgan", L"Включено", L"Enabled" },
     /*S_MENU_SETTINGS*/   { L"Sozlamalar...", L"Настройки...", L"Settings..." },
     /*S_MENU_LANGUAGE*/   { L"Til", L"Язык", L"Language" },
-    /*S_MENU_TUTORIAL*/   { L"Qöllanma...", L"Руководство...", L"Guide..." },
+    /*S_MENU_TUTORIAL*/   { L"Tanişuv...", L"Знакомство...", L"Getting started..." },
     /*S_MENU_ABOUT*/      { L"Dastur haqida...", L"О программе...", L"About..." },
     /*S_MENU_STARTUP*/    { L"Windows bilan işga tuşsin",
                             L"Запускать вместе с Windows",
@@ -39,7 +40,7 @@ static const wchar_t* STR[S_STR_COUNT][LANG_COUNT] = {
     /*S_ABOUT_TITLE*/     { L"Dastur haqida", L"О программе", L"About" },
     /*S_ABOUT_DESC*/      { L"Harfbek — özbek maxsus harflarini (ö ğ ş ç) "
                             L"trigger tugma bilan oson yozish uçun kiçik dastur. "
-                            L"Belgilangan matnni o' g' sh ch ↔ ö ğ ş ç ga o'giradi.",
+                            L"Belgilangan matnni o' g' sh ch ↔ ö ğ ş ç ga ögiradi.",
                             L"Harfbek — небольшая программа для удобного ввода "
                             L"особых узбекских букв (ö ğ ş ç) через клавишу-триггер. "
                             L"Преобразует выделенный текст o' g' sh ch ↔ ö ğ ş ç.",
@@ -57,10 +58,10 @@ static const wchar_t* STR[S_STR_COUNT][LANG_COUNT] = {
     /*S_LIC_TITLE*/       { L"Litsenziya", L"Лицензия", L"License" },
     /*S_LIC_BODY*/        { L"Harfbek — erkin va oçiq dastur, MIT litsenziyasi ostida tarqatiladi.\r\n\r\n"
                             L"Dastur \"borligiça\" (AS IS), heç qanday kafolatsiz beriladi. Undan foydalaniş natijasida yuzaga kelgan har qanday zarar uçun muallif javobgar emas.\r\n\r\n"
-                            L"O'zgartirilgan yoki boşqa manbadan olingan versiyalar muallifga aloqador emas.\r\n\r\n"
+                            L"Özgartirilgan yoki boşqa manbadan olingan versiyalar muallifga aloqador emas.\r\n\r\n"
                             L"© 2026 Husanboy Umarov (ascoder)\r\n"
                             L"Rasmiy manba: github.com/HusanboyUmarov/Harfbek\r\n"
-                            L"To'liq matn: LICENSE fayli.",
+                            L"Töliq matn: LICENSE fayli.",
                             L"Harfbek — свободная программа с открытым кодом, распространяется по лицензии MIT.\r\n\r\n"
                             L"Программа предоставляется «как есть» (AS IS), без каких-либо гарантий. Автор не несёт ответственности за любой ущерб, возникший в результате её использования.\r\n\r\n"
                             L"Изменённые или сторонние сборки не связаны с автором.\r\n\r\n"
@@ -82,30 +83,13 @@ static const wchar_t* STR[S_STR_COUNT][LANG_COUNT] = {
                             L"Choose the program language:" },
 
     // --- qo'llanma ---
-    /*S_TUT_TITLE*/       { L"Qöllanma — qanday işlatiş",
-                            L"Руководство — как пользоваться",
-                            L"Guide — how to use" },
+    /*S_TUT_TITLE*/       { L"Harfbek bilan tanişuv",
+                            L"Знакомство с Harfbek",
+                            L"Getting started with Harfbek" },
     /*S_TUT_NEXT*/        { L"Keyingi ▶", L"Далее ▶", L"Next ▶" },
     /*S_TUT_BACK*/        { L"◀ Orqaga", L"◀ Назад", L"◀ Back" },
     /*S_TUT_FINISH*/      { L"Tugatiş", L"Готово", L"Finish" },
     /*S_TUT_STEP*/        { L"Qadam %d / %d", L"Шаг %d / %d", L"Step %d / %d" },
-
-    /*S_TUT_1_TITLE*/     { L"Harf yoziş", L"Ввод буквы", L"Typing a letter" },
-    /*S_TUT_1_BODY*/      { L"Trigger tugmani (standart: AltGr — öng Alt) bosib turib harfni bosing.",
-                            L"Удерживая клавишу-триггер (по умолч.: AltGr — правый Alt), нажмите букву.",
-                            L"Hold the trigger key (default: AltGr — right Alt) and press the letter." },
-    /*S_TUT_2_TITLE*/     { L"Katta harf", L"Заглавная буква", L"Uppercase" },
-    /*S_TUT_2_BODY*/      { L"Katta harf uçun Shift ni ham bosing. CapsLock ham işlaydi.",
-                            L"Для заглавной буквы добавьте Shift. CapsLock тоже работает.",
-                            L"For an uppercase letter, also press Shift. CapsLock works too." },
-    /*S_TUT_3_TITLE*/     { L"Barça harflar", L"Все буквы", L"All letters" },
-    /*S_TUT_3_BODY*/      { L"Törtala maxsus harf şu tartibda yoziladi.",
-                            L"Все четыре особые буквы вводятся так.",
-                            L"All four special letters are typed like this." },
-    /*S_TUT_4_TITLE*/     { L"Sozlamalar", L"Настройки", L"Settings" },
-    /*S_TUT_4_BODY*/      { L"Soat yonidagi ikonkaga öng tugma bosing → Sozlamalar. U yerdan til va trigger tugmani özgartiring.",
-                            L"Правый клик по значку у часов → Настройки. Там можно сменить язык и клавишу-триггер.",
-                            L"Right-click the tray icon → Settings. There you can change the language and the trigger key." },
 
     // --- sozlamalar ---
     /*S_SET_TITLE*/         { L"Sozlamalar", L"Настройки", L"Settings" },
@@ -116,7 +100,6 @@ static const wchar_t* STR[S_STR_COUNT][LANG_COUNT] = {
                               L"Run at Windows startup" },
     /*S_SET_SAVE*/          { L"Saqlaş", L"Сохранить", L"Save" },
     /*S_SET_CANCEL*/        { L"Bekor qiliş", L"Отмена", L"Cancel" },
-    /*S_SET_CURRENT*/       { L"Joriy:", L"Текущая:", L"Current:" },
     /*S_SET_APOSTROPHE*/    { L"Apostrof (o' g'):", L"Апостроф (o' g'):", L"Apostrophe (o' g'):" },
 
     // --- trigger nomlari (faqat sinalgan tugmalar) ---
@@ -153,6 +136,144 @@ static const wchar_t* STR[S_STR_COUNT][LANG_COUNT] = {
                             L"  •  desktop shortcut\r\n\r\n"
                             L"The harfbek.exe file will remain - to reinstall, just run it again.\r\n\r\n"
                             L"Continue?" },
+
+    // --- avto rejim ---
+    /*S_MENU_AUTOMODE*/   { L"Avto rejim (o' g' sh ch → ö ğ ş ç)",
+                            L"Авторежим (o' g' sh ch → ö ğ ş ç)",
+                            L"Auto mode (o' g' sh ch → ö ğ ş ç)" },
+    // S_TOOLTIP_AUTO da %s YO'Q (tooltip formatlanmaydi).
+    /*S_TOOLTIP_AUTO*/    { L"Harfbek — avto rejim: o' g' sh ch → ö ğ ş ç",
+                            L"Harfbek — авторежим: o' g' sh ch → ö ğ ş ç",
+                            L"Harfbek — auto mode: o' g' sh ch → ö ğ ş ç" },
+    /*S_MODE_TRIGGER*/    { L"Trigger tugma + harf",
+                            L"Клавиша-триггер + буква",
+                            L"Trigger key + letter" },
+    /*S_MODE_AUTO*/       { L"Avtomatik: o' g' sh ch → ö ğ ş ç",
+                            L"Автоматически: o' g' sh ch → ö ğ ş ç",
+                            L"Automatic: o' g' sh ch → ö ğ ş ç" },
+
+    // --- sozlamalar tablari ---
+    /*S_TAB_GENERAL*/     { L"Umumiy", L"Общие", L"General" },
+    /*S_TAB_MODE*/        { L"Rejim", L"Режим", L"Mode" },
+    /*S_TAB_HOTKEYS*/     { L"Tezkor tugmalar", L"Горячие клавиши", L"Hotkeys" },
+    /*S_TAB_EXCLUDE*/     { L"Istisnolar", L"Исключения", L"Exclusions" },
+
+    // --- sozlamalar: rejim tabi ---
+    /*S_SET_NOTIFY*/      { L"Rejim almaşganda ekranda xabar körsatilsin",
+                            L"Показывать уведомление на экране при смене режима",
+                            L"Show an on-screen message when the mode changes" },
+    /*S_SET_RULES*/       { L"Avtomatik almaştirilsin:",
+                            L"Заменять автоматически:",
+                            L"Replace automatically:" },
+    // S_SET_EXAMPLE_TRIGGER da aynan bitta %s bor: trigger keycap nomi.
+    /*S_SET_EXAMPLE_TRIGGER*/ { L"Misol: %s + o → ö",
+                            L"Пример: %s + o → ö",
+                            L"Example: %s + o → ö" },
+    /*S_SET_EXAMPLE_AUTO*/  { L"Misol: o'zbek → özbek, Toshkent → Toşkent",
+                            L"Пример: o'zbek → özbek, Toshkent → Toşkent",
+                            L"Example: o'zbek → özbek, Toshkent → Toşkent" },
+
+    // --- sozlamalar: tezkor tugmalar tabi ---
+    /*S_HK_MODE*/         { L"Rejimni almaştiriş:", L"Переключить режим:", L"Switch mode:" },
+    /*S_HK_ENABLE*/       { L"Yoqiş / öçiriş:", L"Включить / выключить:", L"Enable / disable:" },
+    /*S_HK_CONVERT*/      { L"Belgilangan matnni ögiriş:",
+                            L"Преобразовать выделенный текст:",
+                            L"Convert selected text:" },
+    /*S_HK_HINT*/         { L"Maydonni tanlab kerakli tugmalarni bosing. Öçiriş uçun — Backspace.",
+                            L"Выберите поле и нажмите нужные клавиши. Для отключения — Backspace.",
+                            L"Select the field and press the keys. To clear — Backspace." },
+    // S_HK_BUSY da aynan bitta %s bor: tezkor tugma matni (Hotkey_Format).
+    /*S_HK_BUSY*/         { L"\"%s\" tezkor tugmasi band (boşqa dastur işlatmoqda) yoki takrorlangan. Boşqasini tanlang.",
+                            L"Сочетание «%s» занято (используется другой программой) или повторяется. Выберите другое.",
+                            L"The hotkey \"%s\" is busy (used by another program) or duplicated. Choose another one." },
+
+    // --- sozlamalar: istisnolar tabi ---
+    /*S_EX_HINT*/         { L"Bu dasturlarda avto rejim işlamaydi (terminallar doim istisno):",
+                            L"В этих программах авторежим не работает (терминалы всегда исключены):",
+                            L"Auto mode is off in these programs (terminals are always excluded):" },
+    /*S_EX_ADD*/          { L"Qöşiş", L"Добавить", L"Add" },
+    /*S_EX_BROWSE*/       { L"Tanlaş...", L"Обзор...", L"Browse..." },
+    /*S_EX_REMOVE*/       { L"Öçiriş", L"Удалить", L"Remove" },
+    /*S_EX_FILTER*/       { L"Dasturlar (*.exe)", L"Программы (*.exe)", L"Programs (*.exe)" },
+
+    // --- ekrandagi bildirishnoma ---
+    /*S_OSD_MODE_TRIGGER*/{ L"Trigger rejimi", L"Режим триггера", L"Trigger mode" },
+    /*S_OSD_MODE_AUTO*/   { L"Avto rejim", L"Авторежим", L"Auto mode" },
+    /*S_OSD_ENABLED*/     { L"Harfbek yoqildi", L"Harfbek включён", L"Harfbek enabled" },
+    /*S_OSD_DISABLED*/    { L"Harfbek öçirildi", L"Harfbek выключен", L"Harfbek disabled" },
+
+    // --- tanishtiruv (wizard) ---
+    /*S_WIZ_1_TITLE*/     { L"Xuş kelibsiz!", L"Добро пожаловать!", L"Welcome!" },
+    /*S_WIZ_1_BODY*/      { L"Özbek alifbosi özgardi: o' g' sh ch örniga endi ö ğ ş ç yoziladi. "
+                            L"Harfbek bu harflarni oson yoziş uçun yordam beradi.",
+                            L"Алфавит узбекского языка изменился: вместо o' g' sh ch теперь пишутся ö ğ ş ç. "
+                            L"Harfbek помогает легко их вводить.",
+                            L"The Uzbek alphabet has changed: ö ğ ş ç are now used instead of o' g' sh ch. "
+                            L"Harfbek helps you type them easily." },
+    /*S_WIZ_2_TITLE*/     { L"1-rejim: Trigger tugma",
+                            L"Режим 1: клавиша-триггер",
+                            L"Mode 1: Trigger key" },
+    /*S_WIZ_2_BODY*/      { L"Trigger tugmani bosib turib harfni bosing: o → ö, g → ğ, s → ş, c → ç. "
+                            L"Katta harf uçun Shift ni ham bosing.",
+                            L"Удерживая клавишу-триггер, нажмите букву: o → ö, g → ğ, s → ş, c → ç. "
+                            L"Для заглавной добавьте Shift.",
+                            L"Hold the trigger key and press a letter: o → ö, g → ğ, s → ş, c → ç. "
+                            L"Add Shift for uppercase." },
+    /*S_WIZ_3_TITLE*/     { L"2-rejim: Avtomatik",
+                            L"Режим 2: автоматический",
+                            L"Mode 2: Automatic" },
+    /*S_WIZ_3_BODY*/      { L"Odatdagidek o' g' sh ch yozing — ular özi ö ğ ş ç ga aylanadi. "
+                            L"Darhol Backspace bossangiz, asl holiga qaytadi. Terminallarda işlamaydi.",
+                            L"Пишите o' g' sh ch как обычно — они сами станут ö ğ ş ç. "
+                            L"Сразу нажмите Backspace — вернётся исходный вид. В терминалах не работает.",
+                            L"Type o' g' sh ch as usual — they turn into ö ğ ş ç automatically. "
+                            L"Press Backspace right away to undo. Doesn't work in terminals." },
+    /*S_WIZ_4_TITLE*/     { L"Rejimni tanlang", L"Выберите режим", L"Choose a mode" },
+    /*S_WIZ_4_BODY*/      { L"Qaysi usul sizga qulay? Keyin Sozlamalardan özgartiriş mumkin.",
+                            L"Какой способ вам удобнее? Позже можно изменить в Настройках.",
+                            L"Which way suits you? You can change it later in Settings." },
+    /*S_WIZ_5_TITLE*/     { L"Tezkor tugmalar", L"Горячие клавиши", L"Hotkeys" },
+    /*S_WIZ_5_BODY*/      { L"Belgilangan matnni Ctrl + öng tugma bilan ham ögiriş mumkin. "
+                            L"Tugmalarni Sozlamalarda özgartiring.",
+                            L"Выделенный текст можно преобразовать и через Ctrl + правую кнопку мыши. "
+                            L"Клавиши меняются в Настройках.",
+                            L"Selected text can also be converted with Ctrl + right-click. "
+                            L"Change the keys in Settings." },
+    /*S_WIZ_6_TITLE*/     { L"Tayyor!", L"Готово!", L"Ready!" },
+    /*S_WIZ_6_BODY*/      { L"Harfbek soat yonidagi ikonka orqali boşqariladi.",
+                            L"Harfbek управляется через значок возле часов.",
+                            L"Harfbek is controlled from the tray icon near the clock." },
+
+    // --- flyout, tezkor tugma yozish, istisnolar, sozlamalar sahifalari ---
+    /*S_FLY_ACTIVE*/      { L"Faol", L"Активен", L"Active" },
+    /*S_FLY_PAUSED*/      { L"Töxtatilgan", L"Приостановлен", L"Paused" },
+    /*S_FLY_GUIDE*/       { L"Tanişuv", L"Знакомство", L"Getting started" },
+    /*S_HK_RECORD*/       { L"Tugmalarni bosing...", L"Нажмите клавиши...", L"Press the keys..." },
+    /*S_HK_NONE*/         { L"Yöq", L"Нет", L"None" },
+    /*S_EX_EMPTY*/        { L"Hali istisno yöq", L"Исключений пока нет", L"No exclusions yet" },
+    /*S_NAV_ABOUT*/       { L"Haqida", L"О программе", L"About" },
+    /*S_SET_APPEARANCE_HINT*/ { L"Mavzu Windows sozlamasiga qarab avtomatik tanlanadi",
+                            L"Тема выбирается автоматически по настройкам Windows",
+                            L"The theme follows your Windows setting automatically" },
+
+    // --- sinov maydoni (playground) ---
+    /*S_NAV_PLAYGROUND*/  { L"Sinab köriş", L"Попробовать", L"Try it out" },
+    /*S_PG_HINT*/         { L"Shu yerda yozib köring — Harfbek joriy rejimda işlaydi",
+                            L"Пишите здесь — Harfbek работает в текущем режиме",
+                            L"Type here — Harfbek works in the current mode" },
+    /*S_PG_PLACEHOLDER*/  { L"Yozing: o'zbek, Toshkent, cho'l...",
+                            L"Пишите: o'zbek, Toshkent, cho'l...",
+                            L"Type: o'zbek, Toshkent, cho'l..." },
+    /*S_PG_CHALLENGES*/   { L"Kiçik sinovlar", L"Мини-задания", L"Mini challenges" },
+    /*S_PG_CLEAR*/        { L"Tozalaş", L"Очистить", L"Clear" },
+    // S_PG_COUNTER da aynan bitta %d, S_PG_MODE_BADGE da aynan bitta %s (S_OSD_MODE_* nomi) bor.
+    /*S_PG_COUNTER*/      { L"%d ta maxsus harf", L"Особых букв: %d", L"Special letters: %d" },
+    /*S_PG_MODE_BADGE*/   { L"Joriy rejim: %s", L"Текущий режим: %s", L"Current mode: %s" },
+    /*S_PG_DONE*/         { L"Barçasi bajarildi!", L"Всё выполнено!", L"All done!" },
+    /*S_PG_UNSAVED*/      { L"Rejim özgartirildi — sinaş uçun avval saqlang",
+                            L"Режим изменён — чтобы попробовать, сначала сохраните",
+                            L"Mode changed — save first to try it" },
+    /*S_PG_TRY_NOW*/      { L"Hoziroq sinab köring", L"Попробовать сейчас", L"Try it now" },
 };
 
 const wchar_t* T(StrId id)

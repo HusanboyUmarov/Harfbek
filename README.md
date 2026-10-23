@@ -31,7 +31,7 @@ bo'limida — `harfbek.exe` ni yuklab, ikki marta bosing. Bo'ldi!
 - Windows 10 va 11 da ishlaydi.
 
 Ishga tushgach, soat yonida binafsha **H** ikonka paydo bo'ladi. Unga o'ng tugma
-bosib Sozlamalar, Qo'llanma yoki Chiqish'ni tanlaysiz. Birinchi ishga tushishda
+bosib Sozlamalar, Tanişuv yoki Çiqiş'ni tanlaysiz. Birinchi ishga tushishda
 ish stolida **Harfbek yorlig'i** ham avtomatik yaratiladi — keyingi safar dasturni
 shu yorliqdan ochasiz.
 
@@ -39,7 +39,38 @@ shu yorliqdan ochasiz.
 
 - **Maxsus harflar** — trigger + harf → ö ğ ş ç (Shift yoki CapsLock bilan katta harf).
 - **Matnni o'girish** — matnni belgilab **Ctrl + sichqoncha o'ng tugmasi** bossangiz
-  menyu chiqadi: `ö ğ ş ç → o' g' sh ch` yoki teskarisi.
+  menyu chiqadi: `ö ğ ş ç → o' g' sh ch` yoki teskarisi. Konsol oynalarida (cmd,
+  PowerShell, Windows Terminal) Ctrl + o'ng tugma ushlanmaydi — terminalning o'z
+  xatti-harakati qoladi. Belgilangan asl matnning nusxasi (Ctrl+C) Win+V tarixiga
+  baribir tushadi; faqat o'girilgan vaqtinchalik matn tarixga tushmaydi va asl
+  clipboard dublikatsiz tiklanadi.
+- **Avto rejim** — o'zbek alifbosiga yangi harflar (ö ğ ş ç) kiritilgan: ular
+  `o'`, `g'`, `sh`, `ch` o'rniga ishlatiladi. Avto rejimda eski yozuvda yozasiz
+  (`o'` `g'` `sh` `ch`), dastur uni avtomatik ö ğ ş ç ga o'zgartiradi; katta harf
+  saqlanadi (`Sh` → **Ş**, `sh` → **ş**). O'zgarishdan keyin darhol Backspace
+  bossangiz, asl yozuv qaytadi (`ş` → `sh`) — inglizcha so'zlar uchun qulay.
+  Terminal oynalarida ishlamaydi. Tray menyudan yoki Sozlamalardan yoqiladi.
+  Trigger rejimi bilan bir vaqtda ishlamaydi — biri tanlanadi.
+- **Zamonaviy interfeys** — yorug' va qorong'i mavzu Windows sozlamasiga qarab
+  avtomatik tanlanadi; tray ikonkaga chap tugma bilan tezkor panel ochiladi
+  (o'ng tugma — oddiy menyu).
+- **Sinab köriş maydoni** — Sozlamalardagi alohida sahifa: shu yerda yozib, Harfbek
+  joriy rejimda qanday ishlashini jonli ko'rasiz; maxsus harflar sanagichi va kichik
+  sinovlar bor. Yozganingiz hech qayerga saqlanmaydi.
+- **Tanişuv oynasi** — birinchi ishga tushganda ochiladi: yangi alifbo, ikki rejim
+  va tezkor tugmalar haqida qisqa tushuntirish, rejimni shu yerning o'zida tanlaysiz.
+  Keyin tray menyudagi **Tanişuv...** orqali qayta ochish mumkin.
+- **Sozlamalar tablari** — Umumiy | Rejim | Tezkor tugmalar | Istisnolar.
+- **Tezkor tugmalar** (Sozlamalarda o'zgartiriladi): rejimni almashtirish
+  `Ctrl+Shift+F9`, yoqish/o'chirish `Ctrl+Shift+F10`, belgilangan matnni o'girish
+  `Ctrl+Shift+F11`.
+- **Istisno dasturlar** — avto rejim ishlamaydigan dasturlar ro'yxati (terminallar
+  doim istisno). Ro'yxatga dastur nomini (masalan `code.exe`) yozib yoki
+  **Tanlaş...** tugmasi bilan `.exe` faylini tanlab qo'shasiz.
+- **Ekrandagi bildirishnoma** — rejim yoki yoqish/o'chirish o'zgarganda kichik xabar
+  qisqa vaqtga chiqadi (Sozlamalarda o'chirib qo'yish mumkin).
+- **Avto rejim harflari** — `o'`, `g'`, `sh`, `ch` ning har birini alohida yoqish
+  yoki o'chirish mumkin (Sozlamalar → Rejim tabi, avto rejim tanlanganda).
 - **Trigger tugmani tanlash** — 10 ta sinalgan variant: o'ng Alt (AltGr), chap Alt,
   ikkala Alt, o'ng Ctrl, o'ng Shift, CapsLock, Menyu tugmasi, Scroll Lock, Pause, F12.
 - **3 til interfeysi** — o'zbekcha, ruscha, inglizcha.
@@ -100,7 +131,7 @@ Skript hammasini o'zi qiladi:
 
 > **Build `Permission denied` bilan yiqildimi?** Harfbek **administrator
 > huquqida** ishlab turgan bo'lsa, build skripti uni avtomatik yopolmaydi va
-> exe ustiga yoza olmaydi. Tray'dagi **H** ikonkaga o'ng tugma → **Chiqish**
+> exe ustiga yoza olmaydi. Tray'dagi **H** ikonkaga o'ng tugma → **Çiqiş**
 > qilib, keyin build'ni qayta ishga tushiring. (Oddiy huquqda ishlayotgan
 > bo'lsa, skript o'zi yopadi — hech narsa qilish shart emas.)
 
@@ -113,6 +144,8 @@ ochib: `build.bat`.
   kodlari izohlar bilan berilgan), keyin qayta quring.
 - **Ikonkani o'zgartirish:** `make_icon.ps1` ni tahrirlab ishga tushiring
   (`powershell -ExecutionPolicy Bypass -File make_icon.ps1`), keyin qayta quring.
+- **Manifest:** `app.manifest` (Common Controls v6, DPI) `app.rc` orqali exe ichiga
+  o'rnatiladi; alohida fayl sifatida tarqatish shart emas.
 
 ## 🔒 Rasmiy manba va fayl tekshiruvi
 
