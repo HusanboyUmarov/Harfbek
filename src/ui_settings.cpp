@@ -1469,7 +1469,7 @@ static void AddFromEdit(Win* w)
 // yuklanadi va darhol bo'shatiladi (RAM budjeti).
 static void Browse(Win* w)
 {
-    HMODULE dll = LoadLibraryW(L"comdlg32.dll");
+    HMODULE dll = LoadLibraryExW(L"comdlg32.dll", NULL, LOAD_LIBRARY_SEARCH_SYSTEM32);
     if (!dll) return;
     typedef BOOL (WINAPI *PFN_GetOpenFileNameW)(LPOPENFILENAMEW);
     PFN_GetOpenFileNameW fn = (PFN_GetOpenFileNameW)GetProcAddress(dll, "GetOpenFileNameW");
@@ -2059,7 +2059,7 @@ static LRESULT CALLBACK SettingsWndProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM l
         w->iconBig = (HICON)LoadImageW(g_hInst, MAKEINTRESOURCEW(IDI_APPICON), IMAGE_ICON, big, big, LR_DEFAULTCOLOR);
 
         // sahifa almashuvidagi fade uchun (faqat shu oyna ochiq turganda yuklanadi)
-        w->msimg = LoadLibraryW(L"msimg32.dll");
+        w->msimg = LoadLibraryExW(L"msimg32.dll", NULL, LOAD_LIBRARY_SEARCH_SYSTEM32);
         if (w->msimg)
             w->alphaBlend = (BOOL (WINAPI*)(HDC, int, int, int, int, HDC, int, int, int, int, BLENDFUNCTION))
                             GetProcAddress(w->msimg, "AlphaBlend");

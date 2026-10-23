@@ -78,7 +78,7 @@ bool Ui_Begin()
 {
     if (g_uiRefs++ > 0) return g_gpOk;
     ZeroMemory(&g_gp, sizeof(g_gp));
-    g_gp.dll = LoadLibraryW(L"gdiplus.dll");
+    g_gp.dll = LoadLibraryExW(L"gdiplus.dll", NULL, LOAD_LIBRARY_SEARCH_SYSTEM32);
     if (!g_gp.dll) return false;
     bool ok = GpLoad(g_gp.Startup, "GdiplusStartup") &&
               GpLoad(g_gp.Shutdown, "GdiplusShutdown") &&
@@ -334,7 +334,7 @@ void Ui_ApplyWindowStyle(HWND h)
     typedef HRESULT (WINAPI *FnDwmSet)(HWND, DWORD, LPCVOID, DWORD);
     HMODULE dll = GetModuleHandleW(L"dwmapi.dll");
     bool    own = false;
-    if (!dll) { dll = LoadLibraryW(L"dwmapi.dll"); own = (dll != NULL); }
+    if (!dll) { dll = LoadLibraryExW(L"dwmapi.dll", NULL, LOAD_LIBRARY_SEARCH_SYSTEM32); own = (dll != NULL); }
     if (!dll) return;
     FnDwmSet set = (FnDwmSet)(void*)GetProcAddress(dll, "DwmSetWindowAttribute");
     if (set) {

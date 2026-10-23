@@ -11,6 +11,12 @@
 // esa chaqiruvchi tomonidan allaqachon masshtablangan).
 #include <windows.h>
 
+// Eski MinGW headerlarida bo'lmasligi mumkin (Win8+ / KB2533623 bilan Win7).
+// DLL faqat System32 dan yuklanadi — exe yonidagi soxta DLL ishga tushmaydi.
+#ifndef LOAD_LIBRARY_SEARCH_SYSTEM32
+#define LOAD_LIBRARY_SEARCH_SYSTEM32 0x00000800
+#endif
+
 // ---- Hayot sikli ----
 bool Ui_Begin();   // true — GDI+ mavjud (AA); false bo'lsa ham chizish ishlaydi (GDI)
 void Ui_End();
