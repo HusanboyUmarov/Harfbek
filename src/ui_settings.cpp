@@ -684,7 +684,7 @@ static void LayoutAbout(Win* w)
     int isz = S(w, 72);
     Add(w, -1, K_ICON, x0, top, x0 + isz, top + isz);
     Add(w, -1, K_TEXT, x0 + isz + S(w, 20), top + S(w, 2), X1(w), top + S(w, 44), L"Harfbek", true, TS_TITLE);
-    Add(w, -1, K_TEXT, x0 + isz + S(w, 20), top + S(w, 46), X1(w), top + S(w, 68), L"v1.0.0", true, TS_HINT);
+    Add(w, -1, K_TEXT, x0 + isz + S(w, 20), top + S(w, 46), X1(w), top + S(w, 68), L"v1.1.0", true, TS_HINT);
     int dy = top + S(w, 92);
     int dh = TextH(w, w->fBody, T(S_ABOUT_DESC), X1(w) - x0);
     Add(w, -1, K_TEXT, x0, dy, X1(w), dy + dh, T(S_ABOUT_DESC), true, TS_BODY);
@@ -1260,7 +1260,7 @@ static void Paint(Win* w, HDC dc)
     DrawBrand(w, dc);
     DrawNav(w, dc);
     RECT ver = { S(w, 20), w->ch - S(w, 44), S(w, SIDE_W - 12), w->ch - S(w, 20) };
-    Ui_Text(dc, L"v1.0.0", ver, w->fSmall, th.textDim, DT_SINGLELINE | DT_VCENTER | DT_NOPREFIX);
+    Ui_Text(dc, L"v1.1.0", ver, w->fSmall, th.textDim, DT_SINGLELINE | DT_VCENTER | DT_NOPREFIX);
 
     // kontent: sahifa almashuvi paytida fade + 8 px siljish
     float pa = w->an[AN_PAGE].value;

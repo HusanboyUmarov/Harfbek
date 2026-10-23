@@ -51,6 +51,10 @@ shu yorliqdan ochasiz.
   bossangiz, asl yozuv qaytadi (`ş` → `sh`) — inglizcha so'zlar uchun qulay.
   Terminal oynalarida ishlamaydi. Tray menyudan yoki Sozlamalardan yoqiladi.
   Trigger rejimi bilan bir vaqtda ishlamaydi — biri tanlanadi.
+  **Parol yozganda ehtiyot bo'ling:** avto rejim parol maydonini ajrata olmaydi —
+  parolda `sh`, `ch` yoki `o'` bo'lsa, u ham almashadi. Parol yozishdan oldin
+  `Ctrl+Shift+F10` bilan vaqtincha o'chirib qo'ying yoki o'sha dasturni
+  Istisnolar ro'yxatiga qo'shing.
 - **Zamonaviy interfeys** — yorug' va qorong'i mavzu Windows sozlamasiga qarab
   avtomatik tanlanadi; tray ikonkaga chap tugma bilan tezkor panel ochiladi
   (o'ng tugma — oddiy menyu).
@@ -77,11 +81,15 @@ shu yorliqdan ochasiz.
 - **Apostrof tanlash** — `o'` va `g'` uchun `'`, `ʻ`, `` ` `` yoki `’`.
 - **Windows bilan ishga tushish** — bitta belgi bilan yoqiladi.
 - **Xavfsiz** — hech narsa yozib olinmaydi va saqlanmaydi, internetga chiqmaydi.
-  Kod to'liq ochiq (`src/`).
+  Dastur administrator huquqi so'ramaydi (`asInvoker`), registrda faqat
+  `HKCU\...\Run` yozuviga tegadi (avtozapusk yoqilganda). Tizim kutubxonalari
+  (gdiplus, dwmapi, msimg32, comdlg32) faqat `System32` papkasidan yuklanadi —
+  exe yoniga qo'yilgan begona DLL ishga tushmaydi. Kod to'liq ochiq (`src/`).
 
 > **Nega aynan o'ng Alt?** Chap Alt + Shift Windows'da klaviatura tilini
-> almashtiradi. O'ng Alt (AltGr) unga tegmaydi — katta harf yozganda til almashib
-> ketmaydi.
+> almashtiradi. Harfbek o'ng Alt (AltGr) bilan ishlaganda til almashishi va
+> "yolg'iz Alt" menyu rejimini maxsus himoya bilan bostiradi — katta harf
+> yozganda til almashib ketmaydi, oynaning menyu qatori faollashmaydi.
 
 > **Eslatma:** Alt/Ctrl/Shift bo'lmagan trigger (masalan, CapsLock yoki Menyu
 > tugmasi) tanlansa, u tugma faqat trigger bo'lib ishlaydi — o'zining odatdagi
@@ -167,6 +175,71 @@ ishlatmang.
 
 > **Muallif uchun:** release'dan oldin `checksum.ps1` ni ishga tushiring — u
 > `harfbek.exe.sha256` faylini yasaydi (uni `.exe` bilan birga yuklang).
+
+## 📝 Versiyalar
+
+Har bir release'ning to'liq tavsifi va fayllari:
+<https://github.com/HusanboyUmarov/Harfbek/releases>
+
+### v1.1.0 — 2026-10
+
+Katta yangilanish: ikkinchi yozish rejimi, tezkor tugmalar va to'liq yangi
+interfeys. Eski versiyadan o'tganda sozlamalar saqlanib qoladi, yangi kalitlar
+standart qiymat bilan qo'shiladi.
+
+**Yangi imkoniyatlar**
+
+- **Avto rejim** — `o' g' sh ch` yozilishi bilan `ö ğ ş ç` ga almashadi, katta
+  harf saqlanadi, darhol Backspace bosilsa asl yozuv qaytadi. Har bir juftlikni
+  alohida yoqish/o'chirish mumkin. Terminal va istisno dasturlarda ishlamaydi.
+- **Tezkor tugmalar** — rejim almashtirish `Ctrl+Shift+F9`, yoqish/o'chirish
+  `Ctrl+Shift+F10`, belgilangan matnni o'girish `Ctrl+Shift+F11`. Band tugma
+  haqida Sozlamalar ogohlantiradi.
+- **Istisno dasturlar** — avto rejim ishlamaydigan dasturlar ro'yxati, nom bilan
+  yoki `.exe` faylni tanlab qo'shiladi.
+- **Trigger tugma tanlovi** — 10 ta sinalgan variant (o'ng/chap/ikkala Alt, o'ng
+  Ctrl, o'ng Shift, CapsLock, Menyu, Scroll Lock, Pause, F12).
+- **Yangi interfeys** — yorug'/qorong'i mavzu, tray ikonkaga chap tugma bilan
+  tezkor panel, Sozlamalar tablari (Umumiy | Rejim | Tezkor tugmalar |
+  Istisnolar), Tanişuv oynasi, sinab köriş maydoni, ekrandagi bildirishnoma.
+- Exe'da versiya ma'lumoti (Xossalar → Tafsilotlar) va manifest (Common
+  Controls v6, DPI, administrator huquqi so'ralmaydi).
+
+**Tuzatishlar**
+
+- Klaviatura hook'i alohida thread'da ishlaydi. Oldin Sozlamalar yoki menyu
+  ochiq paytda butun tizim klaviaturasi kechikishi va Windows hook'ni jimgina
+  olib tashlashi mumkin edi.
+- Matnni o'girishda clipboard to'liq (barcha formatlar) saqlanib tiklanadi,
+  vaqtinchalik matn Win+V tarixiga tushmaydi, bir vaqtda ikki o'girish bloklanadi.
+- Ctrl+o'ng tugma: bosish va qo'yib yuborish juft holda ushlanadi, terminal
+  oynalarida ushlanmaydi.
+- Sozlamalar fayli: uzun yo'llar va buzilgan qiymatlar (noma'lum trigger, rejim,
+  tezkor tugma) standartga qaytadi; rejim yoki trigger o'zgarganda eski
+  "bosib turilgan" holat tozalanadi.
+- Avtozapusk yozuvi exe ko'chirilganda yangi yo'lga moslanadi; Explorer qayta
+  ishga tushganda tray ikonka tiklanadi.
+- Tizim kutubxonalari (gdiplus, dwmapi, msimg32, comdlg32) faqat `System32`
+  dan yuklanadi — exe yoniga qo'yilgan begona DLL ishga tushmaydi.
+
+**Bilib qo'ying**
+
+- Avto rejim parol maydonini ajrata olmaydi: parolda `sh`, `ch`, `o'` bo'lsa u
+  ham almashadi. Parol yozishdan oldin `Ctrl+Shift+F10` bilan o'chirib qo'ying.
+
+### v1.0 — 2026-07
+
+Birinchi chiqarilish.
+
+- Trigger rejimi: AltGr + `o g s c` → `ö ğ ş ç`, Shift yoki CapsLock bilan katta harf.
+- Belgilangan matnni o'girish: Ctrl + sichqoncha o'ng tugmasi → `ö ğ ş ç ↔ o' g' sh ch`.
+- Trigger tugmani tanlash, apostrof belgisini tanlash (`'`, `ʻ`, `` ` ``, `’`).
+- Interfeys 3 tilda (o'zbek, rus, ingliz), birinchi ishga tushganda til tanlash va
+  qo'llanma.
+- Windows bilan ishga tushish, ish stolida yorliq, bitta buyruq bilan o'chirish
+  (sozlamalar, avtozapusk, yorliq tozalanadi).
+- Til almashish (Alt+Shift) va "yolg'iz Alt" menyu rejimiga qarshi himoya,
+  osilib qolgan modifikator tekshiruvi.
 
 ## 📄 Litsenziya
 
